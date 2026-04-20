@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -70,24 +70,30 @@ const QuestionItem = ({
         <Label className="text-base font-medium leading-tight">{label}</Label>
       </div>
       
-      <RadioGroup 
-        onValueChange={(val) => form.setValue(name, val as ComplianceStatus)}
-        defaultValue={form.getValues(name)}
-        className="flex gap-4"
-      >
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value={ComplianceStatus.COMPLIANT} id={`${name}-c`} className="text-green-600 border-green-200" />
-          <Label htmlFor={`${name}-c`} className="text-sm cursor-pointer">Conforme</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value={ComplianceStatus.NON_COMPLIANT} id={`${name}-n`} className="text-red-600 border-red-200" />
-          <Label htmlFor={`${name}-n`} className="text-sm cursor-pointer">Não Conf.</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value={ComplianceStatus.NOT_APPLICABLE} id={`${name}-na`} className="text-slate-400" />
-          <Label htmlFor={`${name}-na`} className="text-sm cursor-pointer">N/A</Label>
-        </div>
-      </RadioGroup>
+      <Controller
+        name={name}
+        control={form.control}
+        render={({ field }) => (
+          <RadioGroup 
+            onValueChange={field.onChange}
+            value={field.value}
+            className="flex gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={ComplianceStatus.COMPLIANT} id={`${name}-c`} className="text-green-600 border-green-200" />
+              <Label htmlFor={`${name}-c`} className="text-sm cursor-pointer">Conforme</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={ComplianceStatus.NON_COMPLIANT} id={`${name}-n`} className="text-red-600 border-red-200" />
+              <Label htmlFor={`${name}-n`} className="text-sm cursor-pointer">Não Conf.</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={ComplianceStatus.NOT_APPLICABLE} id={`${name}-na`} className="text-slate-400" />
+              <Label htmlFor={`${name}-na`} className="text-sm cursor-pointer">N/A</Label>
+            </div>
+          </RadioGroup>
+        )}
+      />
     </div>
   );
 };
