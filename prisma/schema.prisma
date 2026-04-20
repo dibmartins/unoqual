@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+
+enum FacilitySize {
+  SMALL      @map("small")
+  MEDIUM     @map("medium")
+  LARGE      @map("large")
+}
+
+enum ComplianceStatus {
+  COMPLIANT       @map("compliant")
+  NON_COMPLIANT   @map("non_compliant")
+  NOT_APPLICABLE  @map("not_applicable")
+}
+
+enum FindingSeverity {
+  CRITICAL  @map("critical")
+  IMPORTANT @map("important")
+  MINOR     @map("minor")
+  NONE      @map("none")
+}
+
+// --- MODELS ---
+
+model Organization {
+  id          String     @id @default(uuid()) @map("id")
+  name        String     @map("name")
+  cnpj        String     @unique @map("cnpj")
+  facilities  Facility[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("organizations")
+}
+
+model Facility {
+  id              String       @id @default(uuid()) @map("id")
+  organizationId  String       @map("organization_id")
+  name            String       @map("name")
+  size            FacilitySize @map("size")
+  bedCapacity     Int          @map("bed_capacity")
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  departments     Department[]
+  inspections     Inspection[]
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@map("facilities")
+}
+
+model Department {
+  id                   String     @id @default(uuid()) @map("id")
+  facilityId           String     @map("facility_id")
+  name                 String     @map("name")
+  bedCount             Int        @default(0) @map("bed_count")
+  averageOccupancyRate Float?     @map("average_occupancy_rate")
+  facility             Facility   @relation(fields: [facilityId], references: [id])
+  inspectionEntries    InspectionEntry[]
+  staffingCalculations StaffingCalculation[]
+  createdAt            DateTime   @default(now()) @map("created_at")
+  updatedAt            DateTime   @updatedAt @map("updated_at")
+
+  @@map("departments")
+}
+
+model Inspection {
+  id                   String                @id @default(uuid()) @map("id")
+  facilityId           String                @map("facility_id")
+  inspectorId          String                @map("inspector_id")
+  status               String                @default("draft") @map("status")
+  completedAt          DateTime?             @map("completed_at")
+  reportHash           String?               @map("report_hash") 
+  signatureIp          String?               @map("signature_ip")
+  signatureUserAgent   String?               @map("signature_user_agent")
+  facility             Facility              @relation(fields: [facilityId], references: [id])
+  entries              InspectionEntry[]
+  staffingCalculations StaffingCalculation[]
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+
+  @@map("inspections")
+}
+
+model InspectionEntry {
+  id                String           @id @default(uuid()) @map("id")
+  inspectionId      String           @map("inspection_id")
+  departmentId      String?          @map("department_id")
+  type              String           @default("checklist") @map("type")
+  checklistItemKey  String           @map("checklist_item_key")
+  complianceStatus  ComplianceStatus @map("compliance_status")
+  findingSeverity   FindingSeverity  @default(NONE) @map("finding_severity")
+  observation       String?          @map("observation")
+  evidenceUrl       String?          @map("evidence_url")
+  metadata          Json?            @map("metadata")
+  recommendedAction String?          @map("recommended_action")
+  inspection        Inspection       @relation(fields: [inspectionId], references: [id])
+  department        Department?      @relation(fields: [departmentId], references: [id])
+
+  @@index([inspectionId, checklistItemKey])
+  @@map("inspection_entries")
+}
+
+model StaffingCalculation {
+  id                  String     @id @default(uuid()) @map("id")
+  inspectionId        String     @map("inspection_id")
+  departmentId        String     @map("department_id")
+  professionalClass   String     @map("professional_class")
+  totalNursingHours   Float      @map("total_nursing_hours")
+  requiredStaffing    Int        @map("required_staffing")
+  currentStaffing     Int        @map("current_staffing")
+  staffingGap         Int        @map("staffing_gap")
+  inspection          Inspection @relation(fields: [inspectionId], references: [id])
+  department          Department @relation(fields: [departmentId], references: [id])
+
+  @@map("staffing_calculations")
+}
