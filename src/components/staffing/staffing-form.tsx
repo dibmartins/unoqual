@@ -23,14 +23,14 @@ const staffingSchema = z.object({
   facilityId: z.string().min(1, "Selecione uma unidade"),
   departmentId: z.string().min(1, "Selecione um setor"),
   weeklyHours: z.enum(["20", "30", "36", "40"]),
-  
+
   // Censo de Pacientes
   pcm: z.coerce.number().min(0), // Cuidado Mínimo
   pci: z.coerce.number().min(0), // Cuidado Intermediário
   pcad: z.coerce.number().min(0), // Alta Dependência
   pcsi: z.coerce.number().min(0), // Semi-Intensivo
   pcit: z.coerce.number().min(0), // Intensivo
-  
+
   // Quadro Atual
   currentNurses: z.coerce.number().min(0),
   currentTechs: z.coerce.number().min(0),
@@ -75,22 +75,22 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
   });
 
   const watchAll = form.watch();
-  
+
   // Cálculos em tempo real
   const calculations = useMemo(() => {
     const { pcm = 0, pci = 0, pcad = 0, pcsi = 0, pcit = 0, weeklyHours = "36" } = watchAll;
-    
+
     // THE = [(PCM*4)+(PCI*6)+(PCAD*10)+(PCSI*10)+(PCIt*18)]
     const the = (pcm * 4) + (pci * 6) + (pcad * 10) + (pcsi * 10) + (pcit * 18);
-    
+
     const km = KM_MAP[weeklyHours as keyof typeof KM_MAP] || 0.2353;
     const qp = Math.ceil(the * km);
-    
+
     // Proporcionalidade
     const nurseRatio = (pcit > 0 || pcsi > 0) ? 0.52 : 0.33;
     const requiredNurses = Math.ceil(qp * nurseRatio);
     const requiredTechs = qp - requiredNurses;
-    
+
     return { the, qp, requiredNurses, requiredTechs };
   }, [watchAll]);
 
@@ -106,7 +106,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
         ...data,
         calculations
       });
-      
+
       if (result.success) {
         alert("Dimensionamento salvo com sucesso!");
       } else {
@@ -123,12 +123,12 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
   const handleExportPDF = () => {
     const doc = new jsPDF();
     const timestamp = new Date().toLocaleDateString("pt-BR");
-    
+
     // Header
     doc.setFontSize(22);
     doc.setTextColor(5, 150, 105); // emerald-600
     doc.text("Relatório de Dimensionamento de Enfermagem", 14, 22);
-    
+
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Data de Emissão: ${timestamp}`, 14, 30);
@@ -138,7 +138,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
     doc.setFontSize(14);
     doc.setTextColor(0);
     doc.text("Informações da Unidade", 14, 48);
-    
+
     autoTable(doc, {
       startY: 52,
       head: [['Unidade', 'Setor', 'Jornada Semanal']],
@@ -210,16 +210,16 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Calculator className="w-8 h-8 text-emerald-600" />
-            Dimensionamento de Enfermagem
+            Cálculo de Quadro de Pessoal da Enfermagem
           </h1>
-          <p className="text-slate-500 mt-2">Cálculo de Quadro de Pessoal - Resolução COFEN 543/2017</p>
+          <p className="text-slate-500 mt-2">Resolução COFEN 543/2017</p>
         </div>
       </div>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader className="pb-4">
@@ -257,9 +257,9 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                     name="departmentId"
                     control={form.control}
                     render={({ field }) => (
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value} 
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
                         disabled={!selectedFacility}
                       >
                         <SelectTrigger>
@@ -367,14 +367,14 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
             <Card className="border-emerald-100 bg-emerald-50/20 shadow-lg sticky top-6">
               <CardHeader>
                 <CardTitle className="text-emerald-800">Resultado do Cálculo</CardTitle>
-                <CardDescription>Baseado na Resolução COFEN 543/2017</CardDescription>
+                <CardDescription></CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
                   <Label className="text-slate-500 text-xs uppercase tracking-wider">Total de Horas (THE)</Label>
                   <div className="text-2xl font-bold text-slate-900">{calculations.the}h</div>
                 </div>
-                
+
                 <Separator />
 
                 <div>
@@ -397,8 +397,8 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                 <Separator />
 
                 <div className="space-y-3">
-                  <Label className="text-slate-500 text-xs uppercase tracking-wider">Gap de Staffing</Label>
-                  
+                  <Label className="text-slate-500 text-xs uppercase tracking-wider">Demanda de Profissionais</Label>
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Enfermeiros:</span>
                     {nurseGap >= 0 ? (
@@ -427,9 +427,9 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 mt-4">
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 py-6 text-lg font-bold" 
+                  <Button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 py-6 text-lg font-bold"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -441,10 +441,10 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                       </>
                     )}
                   </Button>
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+
+                  <Button
+                    type="button"
+                    variant="outline"
                     className="w-full py-6 text-lg font-bold border-slate-200 hover:bg-slate-50"
                     onClick={handleExportPDF}
                   >
