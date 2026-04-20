@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Plus, Calculator } from "lucide-react";
 
 export default function Home() {
   return (
@@ -49,10 +51,10 @@ export default function Home() {
               Ver Painel
             </Link>
             <Link 
-              href="#demo" 
-              className="px-8 py-4 bg-white text-gray-900 border-2 border-gray-100 rounded-xl font-bold text-lg hover:bg-gray-50 transition-all"
+              href="/staffing/new" 
+              className="px-8 py-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl font-bold text-lg hover:bg-emerald-100 transition-all text-center"
             >
-              Ver Demo
+              Dimensionar Equipe
             </Link>
           </div>
           
@@ -76,7 +78,20 @@ export default function Home() {
                         <div className="h-20 bg-blue-50 rounded-lg"></div>
                         <div className="h-20 bg-blue-50 rounded-lg"></div>
                         <div className="h-20 bg-blue-50 rounded-lg"></div>
-                        <div className="h-20 bg-blue-50 rounded-lg"></div>
+                        <div className="flex gap-3">
+                          <Link href="/inspection/new">
+                            <Button className="bg-blue-600 hover:bg-blue-700 font-bold gap-2 text-xs">
+                              <Plus className="w-4 h-4" />
+                              Nova Inspeção
+                            </Button>
+                          </Link>
+                          <Link href="/staffing/new">
+                            <Button className="bg-emerald-600 hover:bg-emerald-700 font-bold gap-2 text-xs">
+                              <Calculator className="w-4 h-4" />
+                              Dimensionar
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                     <div className="h-48 bg-gray-50 rounded-xl p-6 border border-dashed border-gray-200">
