@@ -1,4 +1,4 @@
-# Hierarquia de Setores e Unidades
+# Hierarquia de Setores e Unidades de Saude
 
 ```text
 └── Urgência e Emergência (emergency_care)
