@@ -1,0 +1,35 @@
+# Formulário Inspeção de Equipamentos de UTI
+Todos os inputs do [Formulário de Inspeção de Equipamentos](form-inspecao-equipamentos.md) mais os itens abaixo
+- Geladeira exclusiva para medicamentos/insumos com controle de temperatura? (definir finalidade)
+- Computadores suficientes?
+- Relógio/calendário visível ao paciente?
+- Monitorização central disponível?
+- Nobreak para monitorização crítica?
+- Bomba infusora?
+- Monitor multiparamétrico?
+- Ventilador mecânico fixo
+- Ventilador mecânico de transporte
+- Cadeira higiênica
+- Suporte de soro
+- Colchão pneumático
+- Gasômetro
+- Cufometro
+- Balança digital
+- Cadeira de rodas
+- Maca de transporte com grade
+- Desfribilador/Cardioversor bifásico
+- Carro de parada
+- Rede de gases completa por leito
+- Capnógrafo / módulo ETCO₂
+- Monitor portátil para transporte intra-hospitalar
+- ECG 12 derivações (fixo ou portátil)
+- Laringoscópio convencional e/ou videolaringoscópio
+- Ambu adulto/pediátrico conforme perfil
+- Cilindro de O₂ para transporte
+- Kit de intubação difícil
+- Aspirador portátil
+- Material de via aérea de emergência
+- Bomba de dieta enteral
+- Escada de dois degraus
+- Poltrona reclinável para mobilização precoce
+- Ultrassom point-of-care

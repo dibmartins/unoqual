@@ -1,0 +1,15 @@
+Formulário de Dimensionamento Padrão 
+- Número total de profissionais - (campo inteiro)
+- Número de profissionais por turno (diurno/noturno)
+- Número de profissionais rotina - (campo inteiro)
+- Escala de trabalho predominante (12/36, 24/72, 24/96, 24/120, Diarista)
+- Possui escala de sobreaviso (boolean)
+- Vínculo empregatício (CLT, PJ, Contrato Temporário, Terceirizado, Estatutário)
+- Existe cobertura formal de folgas (boolean)
+- Existe cobertura formal de férias (boolean)
+- Fonte de informação fornecida (Sistema, Livro de registro, Info verbal, Produção enviada)
+- Possui responsável técnico (boolean)
+- Média etária por equipe (inteiro)
+- Taxa de absenteismo (Pequena, Média ou Grande)
+- Observações gerais (texto corrido)
+

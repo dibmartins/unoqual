@@ -1,0 +1,38 @@
+# Formulário Inspeção de Infraestrutura Física de UTI
+Todos os inputs do [Formulário de Inspeção de Infraestrutura Física](form-inspecao-estrutura-fisica.md) mais os itens abaixo
+- Possui sala de recepção para familiares?
+- Possui sala reservada para acolhimento/comunicação de notícias?
+- Possui sala para prescrição médica/evolução multiprofissional?
+- Possui sala administrativa/coordenação?
+- Possui copa de colaboradores?
+- Possui vestiário/local para troca de roupa da equipe?
+- Possui sanitário exclusivo para colaboradores?
+- Possui área de descanso de plantonistas?
+- Quantidade de leitos compatível com área física?
+- Distância adequada entre leitos?
+- Possui boxes individualizados ou divisórias?
+- Cada leito possui visão direta da equipe?
+- Cada leito possui régua de gases completa?
+- Quantidade suficiente de tomadas hospitalares por leito?
+- Iluminação assistencial adequada por leito?
+- Campainha/chamada acessível?
+- Espaço para ventilador mecânico e bombas?
+- Há leitos de isolamento?
+- Há pia/lavatório próximo aos leitos?
+- Posto de enfermagem central com visão para os leitos?
+- Área adequada para preparo de medicações?
+- Bancada funcional?
+- Armários/arquivo operacional?
+- Rede lógica e elétrica adequada?
+- Sala de Equipamentos e Recarga?
+- Sala de utilidades/expurgo exclusiva?
+- Depósito de material limpo?
+- Depósito de material de limpeza (DML)?
+- Local para resíduos segregados?
+- Rouparia limpa e suja separadas?
+- Almoxarifado satélite?
+- Observações gerais
+- Abertura envidraçada com luz natural e percepção dia/noite?
+- Temperatura das salas monitoradas?
+- Saídas de emergência sinalizadas?
+- Sistema de gases com alarme?

@@ -1,0 +1,43 @@
+# Formulário Inspeção de Equipamentos de Centro Cirurgico
+Todos os inputs do [Formulário de Inspeção de Equipamentos](form-inspecao-equipamentos.md) mais os itens abaixo
+- Mesa cirúrgica elétrica/hidráulica
+- Monitor multiparamétrico
+- Rede de gases medicinais completa (O₂, ar comprimido, vácuo)
+- Carro de anestesia
+- Bomba infusora
+- Suporte de soro
+- Foco cirúrgico de teto/móvel
+- Eletrocautério / unidade eletrocirúrgica
+- Aspirador cirúrgico portátil ou rede de vácuo
+- Mesa de Mayo
+- Mesa para instrumentação (mesa de back table)
+- Mesa auxiliar inox
+- Ventilador integrado ao aparelho de anestesia
+- Capnografia
+- Oxímetro de pulso
+- Carrinho de medicamentos anestésicos
+- Laringoscópio
+- Videolaringoscópio
+- Ambu adulto/pediátrico conforme perfil
+- Bomba de seringa
+- Arco cirúrgico
+- Monitor de imagens cirúrgicas
+- Torre de vídeo para laparoscopia
+- Maca de transporte com grades
+- Prancha de transferência
+- Cadeira de rodas
+- Carro de parada cardiorrespiratória
+- Desfibrilador/Cardioversor bifásico
+- Aspirador de emergência
+- Nobreak para equipamentos críticos
+- Extintor sinalizado
+- Aquecedor de paciente / manta térmica
+- Aquecedor de fluidos
+- Escadinha de acesso
+- Relógio de parede com segundos
+- Computador para registro intraoperatório
+- Serra/furadeira ortopédica
+- Garrote pneumático
+- Insuflador de CO₂
+- Fonte de luz
+- Mesa de urologia/ginecologia perneiras/acessórios
