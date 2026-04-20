@@ -162,3 +162,47 @@ export async function getRecentInspections() {
     },
   });
 }
+
+/**
+ * Legado: Cria uma inspeção completa com múltiplos itens de uma vez.
+ */
+export async function createInspection(data: {
+  facilityId: string;
+  departmentId?: string;
+  inspectorId: string;
+  entries: { checklistItemKey: string; complianceStatus: ComplianceStatus; observation?: string }[];
+}) {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const ins = await tx.inspection.create({
+        data: {
+          facilityId: data.facilityId,
+          inspectorId: data.inspectorId,
+          status: "completed",
+          completedAt: new Date(),
+        },
+      });
+
+      if (data.entries.length > 0) {
+        await tx.inspectionEntry.createMany({
+          data: data.entries.map(e => ({
+            inspectionId: ins.id,
+            departmentId: data.departmentId,
+            type: "checklist",
+            checklistItemKey: e.checklistItemKey,
+            complianceStatus: e.complianceStatus,
+            observation: e.observation,
+          })),
+        });
+      }
+
+      return ins;
+    });
+
+    revalidatePath("/dashboard");
+    return { success: true, id: result.id };
+  } catch (error) {
+    console.error("Failed to create complete inspection:", error);
+    return { success: false, error: "Erro ao criar inspeção completa" };
+  }
+}
