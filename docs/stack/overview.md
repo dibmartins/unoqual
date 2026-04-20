@@ -43,6 +43,8 @@ Medidas de segurança atuais e planejadas:
 - **Controle de Acesso:** Isolamento rigoroso de inquilinos (*tenant isolation*). Os consultores e gestores só podem visualizar e editar dados dos hospitais aos quais estão formalmente vinculados.
 - **Minimização de Dados:** Seguindo os princípios da LGPD, armazenamos os níveis de complexidade dos pacientes sem PII (Informações de Identificação Pessoal).
 - **Proteção de Evidências:** Fotos das inspeções são armazenadas em bucket compatível com S3. O acesso é restrito através de URLs assinadas temporárias vinculadas a sessões autenticadas.
+- **Digital Signature:** Cada inspeção finalizada deve gerar um hash (SHA-256) do conteúdo e armazenar o user_agent e ip_address do consultor no momento da submissão.
+- **Criptografia de Imagens:** Como fotos de hospitais podem conter rostos de pacientes ou dados em prontuários (mesmo que acidentalmente), as imagens no bucket S3 não devem ser públicas. Use S3 Managed Keys (SSE-S3) e acesso via Pre-signed URLs com validade de 5 minutos.
 
 ---
 
