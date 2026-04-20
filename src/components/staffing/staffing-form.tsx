@@ -279,17 +279,23 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label>Jornada Semanal (horas)</Label>
-                  <Select onValueChange={(val) => form.setValue("weeklyHours", val as StaffingFormValues["weeklyHours"])} defaultValue={watchAll.weeklyHours}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="20">20 horas</SelectItem>
-                      <SelectItem value="30">30 horas</SelectItem>
-                      <SelectItem value="36">36 horas</SelectItem>
-                      <SelectItem value="40">40 horas</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="weeklyHours"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="20">20 horas</SelectItem>
+                          <SelectItem value="30">30 horas</SelectItem>
+                          <SelectItem value="36">36 horas</SelectItem>
+                          <SelectItem value="40">40 horas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -338,17 +344,23 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                   <div className="space-y-2">
                     <Label>Jornada Semanal</Label>
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <Select defaultValue="36" onValueChange={(val: any) => form.setValue("weeklyHours", val)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="20">20 horas</SelectItem>
-                        <SelectItem value="30">30 horas</SelectItem>
-                        <SelectItem value="36">36 horas</SelectItem>
-                        <SelectItem value="40">40 horas</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="weeklyHours"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="20">20 horas</SelectItem>
+                            <SelectItem value="30">30 horas</SelectItem>
+                            <SelectItem value="36">36 horas</SelectItem>
+                            <SelectItem value="40">40 horas</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Enfermeiros Atuais</Label>
