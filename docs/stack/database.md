@@ -38,3 +38,12 @@ Criação de tabelas de domínio para que o usuário não precise digitar nomes 
 
 ### B. Diretrizes de Refatoração
 A refatoração foca em decompor tabelas monolíticas em entidades menores e mais especializadas, seguindo os princípios de Normalização de Banco de Dados e as diretrizes da LGPD para minimização de dados sensíveis.
+
+---
+
+## 🏗️ Seeds
+
+### A. Infraestrutura Padronizada (Seed Data)
+Em ambiente local e stage iremos trabalhar com seeds de dados fakes para simular a infraestrutura hospitalar.
+Também teremos seeds para dados de domínio (normas, setores, etc) que serão carregados na inicialização do banco de dados, inclusive para produção.
+Esses diferentes tipos de seeds devem ser isolados em scrips distintos.

@@ -2,6 +2,17 @@
 
 Este documento descreve a arquitetura técnica, refletindo a implementação estabelecida e as escolhas modernas de stack de desenvolvimento.
 
+### Resumo de Entendimento
+- **O que está sendo construído:** Uma plataforma SaaS chamada Unoqual (Sistema de Gestão de Qualidade Hospitalar) para digitalizar inspeções hospitalares, avaliar matrizes de risco e gerar relatórios instantaneamente.
+- **Por que existe:** Para eliminar cerca de 35 horas de redação manual de relatórios por hospital, automatizando cálculos e padronizando processos em conformidade com normas regulatórias.
+- **Para quem é:** Consultores Técnicos (que inserem os dados) e Gestores Hospitalares (que acessam um Portal do Cliente para visualizar *dashboards* e baixar relatórios).
+- **Principais restrições:** A plataforma deve impor um rigoroso isolamento entre clientes (*multi-tenancy*), manter *logs* de auditoria abrangentes e criptografar dados sensíveis desde o primeiro dia.
+- **Não-objetivos explícitos:** Funcionalidades *offline* (sincronização/armazenamento *offline* via PWA) estão estritamente fora do escopo do MVP V1 para priorizar a velocidade de lançamento no mercado (*speed to market*).
+
+### Premissas
+- **Escala e Hospedagem:** Projetado inicialmente para 1 a 5 consultores e <20 unidades hospitalares. Uma configuração de hospedagem enxuta (Vercel + Banco de Dados Gerenciado como Neon/Supabase + S3 para imagens) é suficiente.
+- **Escopo do MVP:** O lançamento inicial foca exclusivamente no módulo de "Inspeções".
+
 ---
 
 ## 🚀 Stack Tecnológica
@@ -10,9 +21,20 @@ O projeto utiliza uma stack de ponta e de alta performance:
 
 - **Frontend:** Next.js 16 (App Router) com React 19, utilizando Server Components e Actions.
 - **Estilização:** Tailwind CSS 4 com configuração nativa *CSS-first* e Shadcn/UI.
-- **Camada de Banco de Dados:** Prisma 6 atuando como o ORM type-safe para um banco de dados PostgreSQL.
+- **Camada de Banco de Dados:** Prisma 6 atuando como o ORM type-safe para um banco de dados PostgreSQL gerenciado pela Neon.
 - **Autenticação:** NextAuth.js 4 gerenciando sessões seguras com Controle de Acesso Baseado em Funções (RBAC).
 - **Ambiente:** Implantado e gerenciado via Vercel com Neon para Postgres serverless.
+- **Gerenciador de Pacotes:** `pnpm`
+- **Armazenamento de Imagens:** AWS S3 (ou compatível como Cloudflare R2). O *frontend* solicita URLs pré-assinadas (*pre-signed URLs*) seguras para fazer o *upload* das fotos de inspeção diretamente pelo navegador, contornando os limites das funções *serverless*.
+
+---
+
+## Estratégia de Testes e Garantia de Qualidade (QA)
+- **Testes Unitários da Lógica Central:** Fórmulas serão isoladas como funções TypeScript puras e agnósticas de *framework*. Testes unitários abrangentes (Jest/Vitest) garantirão extrema precisão para todos os limites matemáticos.
+- **Testes E2E (Ponta a Ponta):** Os testes em Playwright terão como alvo os "Caminhos Felizes" (*Happy Paths*) críticos: entrada de dados pelo Consultor e *download* de relatórios pelo Gestor.
+- **Deployment:** A integração da Vercel com o GitHub acionará Ambientes de Pré-visualização Automáticos (*Automatic Preview Environments*), executando todos os testes matemáticos isolados de forma segura antes de qualquer *merge* de código para produção.
+
+---
 
 ## 🔐 Política de Segurança e LGPD
 
