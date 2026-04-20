@@ -1,9 +1,16 @@
 import { StaffingForm } from "@/components/staffing/staffing-form";
-import { getFacilities } from "@/app/actions/inspection";
+import prisma from "@/lib/prisma";
 
-export default async function NewStaffingPage() {
-  const facilities = await getFacilities();
-  
+export default async function StaffingPage() {
+  const facilities = await prisma.facility.findMany({
+    include: {
+      departments: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
   return (
     <main className="min-h-screen bg-slate-50">
       <StaffingForm facilities={facilities} />

@@ -10,8 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calculator, Users, Building2, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Calculator, Users, Building2, Clock, AlertCircle, CheckCircle2, FileDown, Save } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { saveStaffingAction } from "@/app/actions/staffing";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const staffingSchema = z.object({
   facilityId: z.string().min(1, "Selecione uma unidade"),
@@ -52,7 +55,6 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<StaffingFormValues>({
-    // @ts-expect-error: Zod resolver version mismatch with React Hook Form
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(staffingSchema) as any,
     defaultValues: {
@@ -96,10 +98,102 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
 
   async function onSubmit(data: StaffingFormValues) {
     setIsSubmitting(true);
-    console.log("Saving staffing calculation:", { ...data, results: calculations });
-    alert("Cálculo realizado com sucesso!");
-    setIsSubmitting(false);
+    try {
+      const result = await saveStaffingAction({
+        ...data,
+        calculations
+      });
+
+      if (result.success) {
+        alert("Dimensionamento salvo com sucesso!");
+      } else {
+        alert(result.error || "Ocorreu um erro ao salvar.");
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      alert("Erro de conexão ao salvar o dimensionamento.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const timestamp = new Date().toLocaleDateString("pt-BR");
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(5, 150, 105); // emerald-600
+    doc.text("Relatório de Dimensionamento de Enfermagem", 14, 22);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Data de Emissão: ${timestamp}`, 14, 30);
+    doc.text("Baseado na Resolução COFEN 543/2017", 14, 35);
+
+    // Localização Info
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.text("Informações da Unidade", 14, 48);
+    
+    autoTable(doc, {
+      startY: 52,
+      head: [['Unidade', 'Setor', 'Jornada Semanal']],
+      body: [[
+        selectedFacility?.name || "N/A",
+        selectedFacility?.departments.find(d => d.id === watchAll.departmentId)?.name || "N/A",
+        `${watchAll.weeklyHours}h`
+      ]],
+      theme: 'grid',
+      headStyles: { fillColor: [5, 150, 105] }
+    });
+
+    // Censo de Pacientes
+    doc.text("Censo Assistencial (Média Diária)", 14, (doc as any).lastAutoTable.finalY + 15);
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 20,
+      head: [['PCM', 'PCI', 'PCAD', 'PCSI', 'PCIt']],
+      body: [[
+        watchAll.pcm,
+        watchAll.pci,
+        watchAll.pcad,
+        watchAll.pcsi,
+        watchAll.pcit
+      ]],
+      theme: 'striped',
+      headStyles: { fillColor: [71, 85, 105] } // slate-600
+    });
+
+    // Resultados
+    doc.text("Quadro de Pessoal Necessário", 14, (doc as any).lastAutoTable.finalY + 15);
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 20,
+      head: [['Métrica', 'Cálculo']],
+      body: [
+        ['Total de Horas de Enfermagem (THE)', `${calculations.the}h`],
+        ['Quadro de Pessoal (QP Total)', calculations.qp],
+        ['Enfermeiros Necessários', calculations.requiredNurses],
+        ['Técnicos/Auxiliares Necessários', calculations.requiredTechs]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [5, 150, 105] }
+    });
+
+    // Gap Analysis
+    doc.text("Análise de Gap (Déficit/Superávit)", 14, (doc as any).lastAutoTable.finalY + 15);
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 20,
+      head: [['Categoria', 'Atual', 'Necessário', 'Gap']],
+      body: [
+        ['Enfermeiros', watchAll.currentNurses, calculations.requiredNurses, nurseGap >= 0 ? `+${nurseGap} (OK)` : `${nurseGap} (DÉFICIT)`],
+        ['Técnicos', watchAll.currentTechs, calculations.requiredTechs, techGap >= 0 ? `+${techGap} (OK)` : `${techGap} (DÉFICIT)`]
+      ],
+      theme: 'striped',
+      headStyles: { fillColor: nurseGap < 0 || techGap < 0 ? [220, 38, 38] : [5, 150, 105] }
+    });
+
+    doc.save(`dimensionamento-${selectedFacility?.name || 'relatorio'}.pdf`);
+  };
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
@@ -290,9 +384,32 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 py-6 text-lg font-bold mt-4" disabled={isSubmitting}>
-                  {isSubmitting ? "Gravando..." : "Salvar Dimensionamento"}
-                </Button>
+                <div className="grid grid-cols-1 gap-2 mt-4">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 py-6 text-lg font-bold" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      "Gravando..."
+                    ) : (
+                      <>
+                        <Save className="w-5 h-5 mr-2" />
+                        Salvar Dimensionamento
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full py-6 text-lg font-bold border-slate-200 hover:bg-slate-50"
+                    onClick={exportToPDF}
+                  >
+                    <FileDown className="w-5 h-5 mr-2" />
+                    Gerar Relatório PDF
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

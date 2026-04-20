@@ -177,7 +177,8 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
           <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>Unidade de Saúde</Label>
-              <Select onValueChange={(val) => form.setValue("facilityId", val)}>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <Select onValueChange={(val: any) => form.setValue("facilityId", val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a unidade" />
                 </SelectTrigger>
@@ -190,7 +191,8 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
             </div>
             <div className="space-y-2">
               <Label>Setor / Departamento (Opcional)</Label>
-              <Select onValueChange={(val) => form.setValue("departmentId", val)} disabled={!selectedFacility}>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <Select onValueChange={(val: any) => form.setValue("departmentId", val)} disabled={!selectedFacility}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o setor" />
                 </SelectTrigger>
