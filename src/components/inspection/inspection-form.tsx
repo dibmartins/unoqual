@@ -188,31 +188,49 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
           <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>Unidade de Saúde</Label>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select onValueChange={(val: any) => form.setValue("facilityId" as any, val)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a unidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {facilities.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="facilityId"
+                control={form.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a unidade">
+                        {(value) => facilities.find(f => f.id === value)?.name}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {facilities.map((f) => (
+                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
             <div className="space-y-2">
               <Label>Setor / Departamento (Opcional)</Label>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select onValueChange={(val: any) => form.setValue("departmentId" as any, val)} disabled={!selectedFacility}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o setor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedFacility?.departments.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="departmentId"
+                control={form.control}
+                render={({ field }) => (
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value || undefined} 
+                    disabled={!selectedFacility}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o setor">
+                        {(value) => selectedFacility?.departments.find(d => d.id === value)?.name}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedFacility?.departments.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </CardContent>
         </Card>

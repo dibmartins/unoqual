@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -56,8 +56,7 @@ interface Facility {
 
 export function StaffingForm({ facilities }: { facilities: Facility[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<StaffingFormValues>({
+  const form = useForm<StaffingFormValues>({
     /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
     // @ts-ignore: zod resolver version mismatch between libraries
     resolver: zodResolver(staffingSchema),
@@ -75,7 +74,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
     },
   });
 
-  const watchAll = watch();
+  const watchAll = form.watch();
   
   // Cálculos em tempo real
   const calculations = useMemo(() => {
@@ -100,28 +99,28 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
 
   const selectedFacility = facilities.find(f => f.id === watchAll.facilityId);
 
-  async function onSubmit(data: StaffingFormValues) {
+  const onSubmit = async (data: StaffingFormValues) => {
     setIsSubmitting(true);
     try {
       const result = await saveStaffingAction({
         ...data,
         calculations
       });
-
+      
       if (result.success) {
         alert("Dimensionamento salvo com sucesso!");
       } else {
-        alert(result.error || "Ocorreu um erro ao salvar.");
+        alert("Erro ao salvar: " + result.error);
       }
     } catch (error) {
-      console.error("Submit error:", error);
-      alert("Erro de conexão ao salvar o dimensionamento.");
+      console.error(error);
+      alert("Erro ao salvar o dimensionamento.");
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
-  const exportToPDF = () => {
+  const handleExportPDF = () => {
     const doc = new jsPDF();
     const timestamp = new Date().toLocaleDateString("pt-BR");
     
@@ -218,7 +217,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
       </div>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <div className="lg:col-span-2 space-y-6">
@@ -232,33 +231,65 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Unidade</Label>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <Select onValueChange={(val: any) => setValue("facilityId", val)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {facilities.map((f) => (
-                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.facilityId && <p className="text-xs text-red-500">{errors.facilityId.message}</p>}
+                  <Controller
+                    name="facilityId"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione">
+                            {(value) => facilities.find(f => f.id === value)?.name}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {facilities.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {form.formState.errors.facilityId && <p className="text-xs text-red-500">{form.formState.errors.facilityId.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Setor</Label>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <Select onValueChange={(val: any) => setValue("departmentId", val)} disabled={!selectedFacility}>
+                  <Controller
+                    name="departmentId"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value} 
+                        disabled={!selectedFacility}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione">
+                            {(value) => selectedFacility?.departments.find(d => d.id === value)?.name}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedFacility?.departments.map((d) => (
+                            <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {form.formState.errors.departmentId && <p className="text-xs text-red-500">{form.formState.errors.departmentId.message}</p>}
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Jornada Semanal (horas)</Label>
+                  <Select onValueChange={(val) => form.setValue("weeklyHours", val as StaffingFormValues["weeklyHours"])} defaultValue={watchAll.weeklyHours}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {selectedFacility?.departments.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                      ))}
+                      <SelectItem value="20">20 horas</SelectItem>
+                      <SelectItem value="30">30 horas</SelectItem>
+                      <SelectItem value="36">36 horas</SelectItem>
+                      <SelectItem value="40">40 horas</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.departmentId && <p className="text-xs text-red-500">{errors.departmentId.message}</p>}
                 </div>
               </CardContent>
             </Card>
@@ -274,23 +305,23 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
               <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label className="text-xs text-slate-500">Mínimo (PCM)</Label>
-                  <Input type="number" {...register("pcm")} />
+                  <Input type="number" {...form.register("pcm")} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs text-slate-500">Intermed. (PCI)</Label>
-                  <Input type="number" {...register("pci")} />
+                  <Input type="number" {...form.register("pci")} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs text-slate-500">Alta Dep. (PCAD)</Label>
-                  <Input type="number" {...register("pcad")} />
+                  <Input type="number" {...form.register("pcad")} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs text-slate-500">Semi-Int. (PCSI)</Label>
-                  <Input type="number" {...register("pcsi")} />
+                  <Input type="number" {...form.register("pcsi")} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs text-slate-500">Intensivo (PCIt)</Label>
-                  <Input type="number" {...register("pcit")} />
+                  <Input type="number" {...form.register("pcit")} />
                 </div>
               </CardContent>
             </Card>
@@ -307,7 +338,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                   <div className="space-y-2">
                     <Label>Jornada Semanal</Label>
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <Select defaultValue="36" onValueChange={(val: any) => setValue("weeklyHours", val)}>
+                    <Select defaultValue="36" onValueChange={(val: any) => form.setValue("weeklyHours", val)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -321,11 +352,11 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                   </div>
                   <div className="space-y-2">
                     <Label>Enfermeiros Atuais</Label>
-                    <Input type="number" {...register("currentNurses")} />
+                    <Input type="number" {...form.register("currentNurses")} />
                   </div>
                   <div className="space-y-2">
                     <Label>Técnicos Atuais</Label>
-                    <Input type="number" {...register("currentTechs")} />
+                    <Input type="number" {...form.register("currentTechs")} />
                   </div>
                 </div>
               </CardContent>
@@ -415,7 +446,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                     type="button" 
                     variant="outline" 
                     className="w-full py-6 text-lg font-bold border-slate-200 hover:bg-slate-50"
-                    onClick={exportToPDF}
+                    onClick={handleExportPDF}
                   >
                     <FileDown className="w-5 h-5 mr-2" />
                     Gerar Relatório PDF
