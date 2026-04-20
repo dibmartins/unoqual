@@ -43,10 +43,25 @@ A refatoração foca em decompor tabelas monolíticas em entidades menores e mai
 
 ## 🏗️ Seeds
 
-### A. Infraestrutura Padronizada (Seed Data)
-Em ambiente local e stage iremos trabalhar com seeds de dados fakes para simular a infraestrutura hospitalar.
-Também teremos seeds para dados de domínio (normas, setores, etc) que serão carregados na inicialização do banco de dados, inclusive para produção.
-Esses diferentes tipos de seeds devem ser isolados em scrips distintos.
+Para garantir ambientes consistentes e facilitar o desenvolvimento, utilizamos uma estratégia de seeding enriquecida com ferramentas de geração de dados realistas:
+
+### A. Ferramentas e Bibliotecas
+- **Faker.js (`@faker-js/faker/locale/pt_BR`):** Motor principal para geração de dados sintéticos realistas (nomes de hospitais, CNPJs válidos, datas e números).
+- **Bcryptjs:** Utilizado para gerar hashes de senhas seguras para os usuários de teste e administradores padrão.
+- **Prisma Client:** Orquestrador das operações no banco de dados.
+
+### B. Estratégia de Execução
+
+1. **Dados de Domínio (Infraestrutura):**
+   - Utilizam o padrão `upsert` do Prisma para garantir que registros estruturais (como perfis de unidades, tipos de setores e usuários padrão) sejam criados ou atualizados sem gerar duplicidade.
+   - **Escopo:** Carregados em todos os ambientes, inclusive Produção.
+
+2. **Dados de Volume (Fake Data):**
+   - Utilizam Loops + Faker para gerar massa de dados (Hospitais simulados, sessões de inspeção e achados).
+   - **Escopo:** Exclusivos para ambientes de `local` e `staging`.
+
+> [!TIP]
+> O isolamento desses scripts permite que o desenvolvimento local simule cenários complexos de auditoria em segundos, garantindo que a UI e os cálculos de BI sejam validados com dados variados.
 
 # Proposta Inicial de Modelagem de Dados
 
@@ -102,6 +117,54 @@ Para itens que não são médicos nem enfermeiros (ex: auxiliares de higienizaç
 Se for uma pergunta de Checklist: Se a Mariana estiver avaliando se "A equipe de limpeza utiliza EPI?", isso será um InspectionEntry com departmentId = null (pois a equipe de limpeza costuma ser da unidade toda) e a chave checklist_item_key = 'staff_cleaning_epi'.
 
 Se for contagem numérica (Dimensionamento): No modelo StaffingCalculation, o campo professionalClass é uma String. Isso permite que a Mariana insira "Auxiliar de Limpeza", "Recepcionista" ou "Copeiro", salvando o requiredStaffing (necessário) vs currentStaffing (encontrado) sem estar presa apenas a médicos e enfermeiros.
+
+#### 4.3. O caso do setor real ser vinculado a uma classificação
+Sim, essa distinção entre o "Setor Real" (Instância) e a "Classificação" (Tipo) foi prevista no schema através da estrutura da tabela Department e da lógica de aplicação que o Diego irá implementar.
+
+Aqui está a explicação de como isso funciona na modelagem que propus:
+
+##### 4.3.1. A Modelagem no Banco de Dados
+No schema.prisma, a tabela Department (Setor) carrega essa dualidade:
+
+Snippet de código
+```typescript
+model Department {
+  id                   String     @id @default(uuid()) @map("id")
+  facilityId           String     @map("facility_id")
+  
+  // NOME PERSONALIZADO (APELIDO)
+  // Ex: "UTI B - 3º Andar"
+  name                 String     @map("name") 
+
+  // CLASSIFICAÇÃO (MAPA DE SETORES)
+  // Ex: "uti_adulto", "sala_vermelha", "centro_cirurgico"
+  // Esta chave vincula o setor às regras de negócio e normas (RDC 50)
+  classificationKey    String     @map("classification_key") 
+
+  // ... outros campos
+}
+```
+
+##### 4.3.2. Por que separamos "Name" de "ClassificationKey"?
+No Hospital A: Existe um setor chamado "Enfermaria de Trauma".
+No Hospital B: Existe um setor chamado "Ala de Ortopedia".
+A Inteligência do Unoqual: Ambos são classificados (classificationKey) como enfermaria_adulto.
+
+O que isso permite fazer?
+
+Cálculos Automáticos: O sistema sabe que, por ser uma enfermaria_adulto, ele deve aplicar a fórmula de dimensionamento do Cofen para "Cuidados Intermediários" ou "Mínimos", independentemente do nome que o hospital deu ao setor.
+
+Roteiros Específicos: Quando a Mariana for inspecionar a "Ala de Ortopedia", o sistema olha a classificationKey e carrega automaticamente o checklist de "Enfermaria", e não o de "UTI".
+
+Benchmarking: A Mariana poderá gerar um relatório comparando a eficiência de todas as "UTIs Adulto" de todos os hospitais da carteira dela, mesmo que cada hospital use um nome diferente.
+
+##### 4.3.3. Onde os "Setores Possíveis" (setores.md) ficam?
+Assim como as perguntas dos formulários, os setores mapeados em setores.md (como UTI, CME, Centro Cirúrgico) devem viver em um arquivo de Configuração Mestra (Master Data) no código.
+
+O fluxo de Setup do Setor funcionará assim:
+O usuário escolhe a Classificação em um dropdown (ex: seleciona "UTI Adulto").
+O usuário digita o Nome Personalizado (ex: "UTI Pós-Operatória").
+O banco salva: name: "UTI Pós-Operatória" e classificationKey: "uti_adulto".
 
 ---
 
