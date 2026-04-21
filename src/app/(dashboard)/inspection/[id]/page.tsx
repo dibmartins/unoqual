@@ -9,11 +9,12 @@ import {
   User, 
   ArrowLeft, 
   Calendar, 
-  Calculator, 
   CheckCircle2, 
   XCircle, 
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Printer
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -35,7 +36,7 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
             <Button variant="outline" size="icon" className="rounded-full">
@@ -51,9 +52,19 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
           </div>
         </div>
         
-        <Badge variant={isCompleted ? "secondary" : "outline"} className="px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold">
-          {isCompleted ? "Concluída" : "Rascunho"}
-        </Badge>
+        <div className="flex items-center gap-3">
+          {isCompleted && (
+            <Link href={`/inspection/${id}/report`}>
+              <Button variant="outline" className="font-bold gap-2 text-blue-600 border-blue-200 hover:bg-blue-50">
+                <FileText className="w-4 h-4" />
+                Visualizar Laudo
+              </Button>
+            </Link>
+          )}
+          <Badge variant={isCompleted ? "secondary" : "outline"} className="px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold">
+            {isCompleted ? "Concluída" : "Rascunho"}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

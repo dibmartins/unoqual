@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ClipboardList, Plus, Building2, Calendar, Eye, Play } from "lucide-react";
+import { ClipboardList, Plus, Building2, Calendar, Eye, Play, FileText } from "lucide-react";
 import { translate } from "@/lib/translations";
 
 export default async function DashboardPage() {
@@ -114,19 +114,29 @@ export default async function DashboardPage() {
                       {inspection._count.entries} itens avaliados
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link href={inspection.status === 'draft' ? `/inspection/new?id=${inspection.id}` : `/inspection/${inspection.id}`}>
-                        {inspection.status === 'draft' ? (
-                          <Button variant="outline" size="sm" className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 gap-1.5 font-bold">
-                            <Play className="w-3.5 h-3.5" />
-                            Retomar
-                          </Button>
-                        ) : (
-                          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 gap-1.5 font-bold">
-                            <Eye className="w-3.5 h-3.5" />
-                            Ver Detalhes
-                          </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        {inspection.status === 'completed' && (
+                          <Link href={`/inspection/${inspection.id}/report`}>
+                            <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 gap-1.5 font-bold">
+                              <FileText className="w-3.5 h-3.5" />
+                              Laudo
+                            </Button>
+                          </Link>
                         )}
-                      </Link>
+                        <Link href={inspection.status === 'draft' ? `/inspection/new?id=${inspection.id}` : `/inspection/${inspection.id}`}>
+                          {inspection.status === 'draft' ? (
+                            <Button variant="outline" size="sm" className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 gap-1.5 font-bold">
+                              <Play className="w-3.5 h-3.5" />
+                              Retomar
+                            </Button>
+                          ) : (
+                            <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 gap-1.5 font-bold">
+                              <Eye className="w-3.5 h-3.5" />
+                              Ver Detalhes
+                            </Button>
+                          )}
+                        </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
