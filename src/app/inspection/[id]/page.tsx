@@ -2,10 +2,22 @@ import { getInspectionWithEntries } from "@/app/actions/inspection";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ItemCard } from "@/components/inspection/hub/item-card";
-import { ClipboardCheck, Building2, User, ArrowLeft, Calendar } from "lucide-react";
+import { InspectionAccordionItem } from "@/components/inspection/hub/inspection-accordion-item";
+import { 
+  ClipboardCheck, 
+  Building2, 
+  User, 
+  ArrowLeft, 
+  Calendar, 
+  Calculator, 
+  CheckCircle2, 
+  XCircle, 
+  HelpCircle,
+  MessageSquare
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ComplianceStatus } from "@prisma/client";
 
 interface InspectionDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -33,9 +45,9 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
           <div>
             <h1 className="text-3xl font-black flex items-center gap-3 text-slate-900">
               <ClipboardCheck className="w-10 h-10 text-blue-600" />
-              Detalhes da Visita
+              Relatório de Visita
             </h1>
-            <p className="text-slate-500 font-medium">Histórico de Verificações Realizadas</p>
+            <p className="text-slate-500 font-medium">Resultados e Evidências Coletadas</p>
           </div>
         </div>
         
@@ -45,17 +57,14 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar: Informações Gerais */}
         <div className="space-y-6">
           <Card className="border-slate-200 shadow-sm overflow-hidden">
             <CardHeader className="bg-slate-50/50 border-b p-4">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                Informações Gerais
-              </CardTitle>
+              <CardTitle className="text-sm font-bold">Informações Gerais</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-6">
               <div className="space-y-1.5">
-                <Label small>Unidade de Saúde</Label>
+                <p className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Unidade de Saúde</p>
                 <div className="flex items-center gap-2 p-2 rounded-lg border bg-white text-sm font-medium">
                   <Building2 className="w-4 h-4 text-slate-400" />
                   {inspection.facility.name}
@@ -63,7 +72,7 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
               </div>
 
               <div className="space-y-1.5">
-                <Label small>Inspetor Responsável</Label>
+                <p className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Inspetor Responsável</p>
                 <div className="flex items-center gap-2 p-2 rounded-lg border bg-white text-sm font-medium">
                   <User className="w-4 h-4 text-slate-400" />
                   {inspection.inspectorId === "system-user" ? "Diego Martins" : inspection.inspectorId}
@@ -71,7 +80,7 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
               </div>
 
               <div className="space-y-1.5">
-                <Label small>Data da Realização</Label>
+                <p className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Data da Realização</p>
                 <div className="flex items-center gap-2 p-2 rounded-lg border bg-white text-sm font-medium">
                   <Calendar className="w-4 h-4 text-slate-400" />
                   {new Date(inspection.createdAt).toLocaleDateString("pt-BR")}
@@ -81,42 +90,96 @@ export default async function InspectionDetailsPage({ params }: InspectionDetail
           </Card>
         </div>
 
-        {/* Main: Itens Verificados */}
         <div className="lg:col-span-3 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-800">Itens Verificados</h2>
-            <Badge variant="secondary" className="bg-slate-100 text-slate-600">{inspection.entries.length} itens</Badge>
+            <Badge variant="secondary" className="bg-slate-100 text-slate-600">{inspection.entries.length} itens registrados</Badge>
           </div>
 
           <div className="space-y-4">
             {inspection.entries.length === 0 ? (
-              <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/30 text-slate-400">
+              <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/30 text-slate-400 font-medium">
                 Nenhum item foi registrado nesta inspeção.
               </div>
             ) : (
-              inspection.entries.map((entry) => (
-                <ItemCard
-                  key={entry.id}
-                  type={entry.type}
-                  checklistItemKey={entry.checklistItemKey}
-                  complianceStatus={entry.complianceStatus}
-                  departmentName={entry.department?.name}
-                  metadata={entry.metadata}
-                  readOnly // We need to add this prop to ItemCard
-                />
-              ))
+              inspection.entries.map((entry) => {
+                const isStaffing = entry.type === "staffing";
+                const title = isStaffing ? "Dimensionamento de Pessoal" : 
+                             entry.checklistItemKey === "infraestrutura" ? "Inspeção de Infraestrutura" :
+                             entry.checklistItemKey === "processos" ? "Inspeção de Processos" :
+                             entry.checklistItemKey === "equipamentos" ? "Inspeção de Equipamentos" :
+                             entry.checklistItemKey === "documentacao" ? "Inspeção de Documentação" : "Checklist de Setor";
+                
+                return (
+                  <InspectionAccordionItem
+                    key={entry.id}
+                    title={title}
+                    subtitle={entry.department?.name || "Unidade (Geral)"}
+                    status={entry.complianceStatus}
+                    isStaffing={isStaffing}
+                  >
+                    <div className="space-y-6">
+                      {/* Dados Técnicos (Metadata) */}
+                      {entry.metadata && typeof entry.metadata === 'object' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {Object.entries(entry.metadata).map(([key, value]) => {
+                            if (key === 'observations') return null;
+                            
+                            // Formatação amigável para booleanos e status
+                            let displayValue = String(value);
+                            if (value === true) displayValue = "Sim";
+                            if (value === false) displayValue = "Não";
+                            if (value === ComplianceStatus.COMPLIANT) displayValue = "Conforme";
+                            if (value === ComplianceStatus.NON_COMPLIANT) displayValue = "Não Conforme";
+                            if (value === ComplianceStatus.NOT_APPLICABLE) displayValue = "N/A";
+
+                            return (
+                              <div key={key} className="p-3 bg-white rounded-lg border border-slate-100 flex flex-col gap-1 shadow-sm">
+                                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tight">
+                                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                                </span>
+                                <span className="text-sm font-semibold text-slate-800 break-words">
+                                  {displayValue}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Observação */}
+                      {entry.observation && (
+                        <div className="p-4 bg-slate-100 rounded-xl border border-slate-200">
+                          <div className="flex items-center gap-2 mb-2 text-slate-600">
+                            <MessageSquare className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-wider">Observações e Evidências</span>
+                          </div>
+                          <p className="text-sm text-slate-700 leading-relaxed italic">
+                            "{entry.observation}"
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Legenda de Status Rápida */}
+                      <div className="flex items-center gap-4 text-[11px] font-medium text-slate-400 pt-2">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> Conforme
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <XCircle className="w-3.5 h-3.5 text-red-500" /> Não Conforme
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <HelpCircle className="w-3.5 h-3.5 text-slate-400" /> Não Aplicável
+                        </div>
+                      </div>
+                    </div>
+                  </InspectionAccordionItem>
+                );
+              })
             )}
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function Label({ children, small }: { children: React.ReactNode; small?: boolean }) {
-  return (
-    <p className={`font-bold text-slate-500 uppercase tracking-wider ${small ? "text-[10px]" : "text-xs"}`}>
-      {children}
-    </p>
   );
 }
