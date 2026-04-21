@@ -60,6 +60,8 @@ model Department {
   id                   String     @id @default(uuid()) @map("id")
   facilityId           String     @map("facility_id")
   name                 String     @map("name")
+  classification       String?    @map("classification")
+  hasNursing           Boolean    @default(true) @map("has_nursing")
   bedCount             Int        @default(0) @map("bed_count")
   averageOccupancyRate Float?     @map("average_occupancy_rate")
   facility             Facility   @relation(fields: [facilityId], references: [id])

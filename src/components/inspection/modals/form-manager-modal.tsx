@@ -157,7 +157,11 @@ export function FormManagerModal({
               <Label>Setor / Departamento</Label>
               <Select onValueChange={(val) => setDepartmentId(val || "")} value={departmentId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Geral (Unidade de Saúde)" />
+                  <SelectValue placeholder="Geral (Unidade de Saúde)">
+                    {departmentId === "facility-global" || !departmentId
+                      ? "Geral (Unidade de Saúde)"
+                      : facility.departments.find(d => d.id === departmentId)?.name}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                    <SelectItem value="facility-global">Geral (Unidade de Saúde)</SelectItem>

@@ -16,7 +16,7 @@ export default function Home() {
         <nav className="hidden md:flex items-center gap-8">
           <Link href="#features" className="text-sm font-medium text-gray-600 hover:text-black">Funcionalidades</Link>
           <Link href="#about" className="text-sm font-medium text-gray-600 hover:text-black">Sobre</Link>
-          <Link href="/login" className="text-sm font-medium px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
+          <Link href="/dashboard" className="text-sm font-medium px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
             Acessar Sistema
           </Link>
         </nav>
