@@ -19,6 +19,8 @@ import { ComplianceStatus } from "@prisma/client";
 import { DimensionamentoForm } from "./dimensionamento-form";
 // import { DimensionamentoMedicoForm } from "./dimensionamento-medico-form";
 import { InfraForm } from "./infra-form";
+import { ProcessForm } from "./process-form";
+import { EquipmentForm } from "./equipment-form";
 
 interface FormManagerModalProps {
   isOpen: boolean;
@@ -224,7 +226,23 @@ export function FormManagerModal({
                 />
             )}
 
-            {mode === "inspection" && inspectionType !== "infraestrutura" && (
+            {mode === "inspection" && inspectionType === "processos" && (
+                <ProcessForm 
+                  initialData={initialData} 
+                  onSubmit={handleSave} 
+                  isLoading={isSubmitting}
+                />
+            )}
+
+            {mode === "inspection" && inspectionType === "equipamentos" && (
+                <EquipmentForm 
+                  initialData={initialData} 
+                  onSubmit={handleSave} 
+                  isLoading={isSubmitting}
+                />
+            )}
+
+            {mode === "inspection" && !["infraestrutura", "processos", "equipamentos"].includes(inspectionType) && inspectionType !== "" && (
                 <div className="p-8 text-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
                     <p className="font-medium text-slate-500">Módulo "{inspectionType}" em desenvolvimento.</p>
                     <Button variant="ghost" onClick={() => setStep(0)} className="mt-4">Voltar</Button>

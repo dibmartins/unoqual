@@ -41,10 +41,14 @@ export function ItemCard({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-slate-900">
-                  {isStaffing ? "Dimensionamento de Pessoal" : "Inspeção de Setor"}
+                  {isStaffing ? "Dimensionamento de Pessoal" : 
+                   checklistItemKey === "infraestrutura" ? "Inspeção de Infraestrutura" :
+                   checklistItemKey === "processos" ? "Inspeção de Processos" :
+                   checklistItemKey === "equipamentos" ? "Inspeção de Equipamentos" :
+                   "Inspeção de Setor"}
                 </h3>
                 <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-500">
-                  {checklistItemKey}
+                  {isStaffing ? checklistItemKey : "Checklist"}
                 </Badge>
               </div>
               
