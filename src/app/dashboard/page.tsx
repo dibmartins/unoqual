@@ -114,7 +114,11 @@ export default async function DashboardPage() {
                       {inspection._count.entries} itens avaliados
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Ver Detalhes</Button>
+                      <Link href={inspection.status === 'draft' ? `/inspection/new?id=${inspection.id}` : `/inspection/${inspection.id}`}>
+                        <Button variant="ghost" size="sm">
+                          {inspection.status === 'draft' ? 'Retomar' : 'Ver Detalhes'}
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}

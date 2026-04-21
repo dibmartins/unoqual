@@ -12,20 +12,21 @@ interface ItemCardProps {
   complianceStatus: ComplianceStatus;
   departmentName?: string;
   metadata?: any;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  readOnly?: boolean;
 }
 
-export function ItemCard({
-  type,
-  checklistItemKey,
-  complianceStatus,
-  departmentName,
+export function ItemCard({ 
+  type, 
+  checklistItemKey, 
+  complianceStatus, 
+  departmentName, 
   metadata,
-  onEdit,
-  onDelete
-}: ItemCardProps) {
-  const isStaffing = type === "staffing";
+  onEdit, 
+  onDelete,
+  readOnly = false
+}: ItemCardProps) {  const isStaffing = type === "staffing";
   const Icon = isStaffing ? Calculator : ClipboardCheck;
 
   return (
@@ -74,14 +75,16 @@ export function ItemCard({
             </div>
           </div>
 
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={onEdit}>
-              <Edit3 className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={onDelete}>
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-blue-600" onClick={onEdit}>
+                <Edit3 className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600" onClick={onDelete}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

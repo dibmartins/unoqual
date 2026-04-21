@@ -24,9 +24,15 @@ interface Facility {
   departments: { id: string; name: string }[];
 }
 
-export function VerificationHub({ facilities }: { facilities: Facility[] }) {
+export function VerificationHub({ 
+  facilities,
+  initialInspectionId
+}: { 
+  facilities: Facility[],
+  initialInspectionId?: string
+}) {
   const router = useRouter();
-  const [inspectionId, setInspectionId] = useState<string | null>(null);
+  const [inspectionId, setInspectionId] = useState<string | null>(initialInspectionId || null);
   const [facilityId, setFacilityId] = useState<string>("");
   const [entries, setEntries] = useState<any[]>([]);
   const [isFinishing, setIsFinishing] = useState(false);
@@ -34,6 +40,20 @@ export function VerificationHub({ facilities }: { facilities: Facility[] }) {
   const [editingEntry, setEditingEntry] = useState<any | null>(null);
 
   const selectedFacility = facilities.find(f => f.id === facilityId);
+
+  // Load existing inspection metadata if ID is provided
+  useEffect(() => {
+    async function loadExisting() {
+      if (initialInspectionId) {
+        const res = await getInspectionWithEntries(initialInspectionId);
+        if (res) {
+          setFacilityId(res.facilityId);
+          setEntries(res.entries);
+        }
+      }
+    }
+    loadExisting();
+  }, [initialInspectionId]);
 
   // Initialize or reload inspection
   async function ensureInspection(newFacilityId: string) {
@@ -135,7 +155,9 @@ export function VerificationHub({ facilities }: { facilities: Facility[] }) {
                   disabled={!!inspectionId && entries.length > 0}
                 >
                   <SelectTrigger className="bg-white border-slate-200">
-                    <SelectValue placeholder="Selecione..." />
+                    <SelectValue placeholder="Selecione...">
+                      {facilities.find(f => f.id === facilityId)?.name}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {facilities.map((f) => (

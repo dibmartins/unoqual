@@ -195,7 +195,7 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a unidade">
-                        {(value) => facilities.find(f => f.id === value)?.name}
+                        {facilities.find(f => f.id === field.value)?.name}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -220,7 +220,7 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o setor">
-                        {(value) => selectedFacility?.departments.find(d => d.id === value)?.name}
+                        {selectedFacility?.departments.find(d => d.id === field.value)?.name}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
