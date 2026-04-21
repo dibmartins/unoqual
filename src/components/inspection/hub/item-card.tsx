@@ -45,6 +45,7 @@ export function ItemCard({
                    checklistItemKey === "infraestrutura" ? "Inspeção de Infraestrutura" :
                    checklistItemKey === "processos" ? "Inspeção de Processos" :
                    checklistItemKey === "equipamentos" ? "Inspeção de Equipamentos" :
+                   checklistItemKey === "documentacao" ? "Inspeção de Documentação" :
                    "Inspeção de Setor"}
                 </h3>
                 <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-500">

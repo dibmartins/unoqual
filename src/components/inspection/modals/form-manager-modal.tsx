@@ -21,6 +21,7 @@ import { DimensionamentoForm } from "./dimensionamento-form";
 import { InfraForm } from "./infra-form";
 import { ProcessForm } from "./process-form";
 import { EquipmentForm } from "./equipment-form";
+import { DocumentForm } from "./document-form";
 
 interface FormManagerModalProps {
   isOpen: boolean;
@@ -242,7 +243,15 @@ export function FormManagerModal({
                 />
             )}
 
-            {mode === "inspection" && !["infraestrutura", "processos", "equipamentos"].includes(inspectionType) && inspectionType !== "" && (
+            {mode === "inspection" && inspectionType === "documentacao" && (
+                <DocumentForm 
+                  initialData={initialData} 
+                  onSubmit={handleSave} 
+                  isLoading={isSubmitting}
+                />
+            )}
+
+            {mode === "inspection" && !["infraestrutura", "processos", "equipamentos", "documentacao"].includes(inspectionType) && inspectionType !== "" && (
                 <div className="p-8 text-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
                     <p className="font-medium text-slate-500">Módulo "{inspectionType}" em desenvolvimento.</p>
                     <Button variant="ghost" onClick={() => setStep(0)} className="mt-4">Voltar</Button>
