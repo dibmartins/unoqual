@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 const handler = NextAuth({
   providers: [
@@ -10,24 +12,40 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // This is a placeholder for actual authentication logic
-        if (credentials?.email === "admin@unoqual.com" && credentials?.password === "admin") {
-          return { id: "1", name: "Admin", email: "admin@unoqual.com", role: "ADMIN" };
-        }
-        return null;
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        });
+
+        if (!user) return null;
+
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isPasswordValid) return null;
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          organizationId: user.organizationId
+        };
       }
     })
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
+        token.role = (user as any).role;
+        token.organizationId = (user as any).organizationId;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { role?: string }).role = token.role as string;
+        (session.user as any).role = token.role;
+        (session.user as any).organizationId = token.organizationId;
       }
       return session;
     }

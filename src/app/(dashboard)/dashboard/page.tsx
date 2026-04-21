@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ClipboardList, Plus, Building2, Calendar } from "lucide-react";
+import { ClipboardList, Plus, Building2, Calendar, Eye, Play } from "lucide-react";
 import { translate } from "@/lib/translations";
 
 export default async function DashboardPage() {
@@ -115,9 +115,17 @@ export default async function DashboardPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Link href={inspection.status === 'draft' ? `/inspection/new?id=${inspection.id}` : `/inspection/${inspection.id}`}>
-                        <Button variant="ghost" size="sm">
-                          {inspection.status === 'draft' ? 'Retomar' : 'Ver Detalhes'}
-                        </Button>
+                        {inspection.status === 'draft' ? (
+                          <Button variant="outline" size="sm" className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 gap-1.5 font-bold">
+                            <Play className="w-3.5 h-3.5" />
+                            Retomar
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 gap-1.5 font-bold">
+                            <Eye className="w-3.5 h-3.5" />
+                            Ver Detalhes
+                          </Button>
+                        )}
                       </Link>
                     </TableCell>
                   </TableRow>
