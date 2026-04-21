@@ -2,126 +2,66 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { ComplianceStatus } from "@prisma/client";
+import { InspectionService, UpsertInspectionInput, UpsertEntryInput, CreateInspectionCompleteInput } from "@/services/inspection.service";
+import { ActionResponse, AppError } from "@/lib/errors";
 
-interface UpsertInspectionInput {
-  id?: string;
-  facilityId: string;
-  inspectorId: string;
+export async function createInspection(data: CreateInspectionCompleteInput): Promise<ActionResponse<{ id: string }>> {
+  try {
+    const result = await InspectionService.createInspectionComplete(data);
+    revalidatePath("/dashboard");
+    return { success: true, data: { id: result.id } };
+  } catch (error) {
+    const message = error instanceof AppError ? error.message : "Erro ao criar inspeção completa";
+    return { success: false, error: message };
+  }
 }
 
 /**
  * Creates or updates the base Inspection record.
  */
-export async function upsertInspectionAction(data: UpsertInspectionInput) {
+export async function upsertInspectionAction(data: UpsertInspectionInput): Promise<ActionResponse<{ id: string }>> {
   try {
-    if (data.id) {
-      const inspection = await prisma.inspection.update({
-        where: { id: data.id },
-        data: {
-          facilityId: data.facilityId,
-          inspectorId: data.inspectorId,
-        },
-      });
-      return { success: true, id: inspection.id };
-    } else {
-      const inspection = await prisma.inspection.create({
-        data: {
-          facilityId: data.facilityId,
-          inspectorId: data.inspectorId,
-          status: "draft",
-        },
-      });
-      return { success: true, id: inspection.id };
-    }
+    const inspection = await InspectionService.upsertInspection(data);
+    return { success: true, data: { id: inspection.id } };
   } catch (error) {
-    console.error("Failed to upsert inspection:", error);
-    return { success: false, error: "Falha ao salvar inspeção base" };
+    const message = error instanceof AppError ? error.message : "Falha ao salvar inspeção";
+    return { success: false, error: message };
   }
-}
-
-interface UpsertEntryInput {
-  inspectionId: string;
-  departmentId?: string;
-  type: string;
-  checklistItemKey: string;
-  complianceStatus: ComplianceStatus;
-  metadata?: any;
-  observation?: string;
 }
 
 /**
  * Adds or updates an entry (checklist or dimensionamento) in the inspection.
  */
-export async function upsertEntryAction(data: UpsertEntryInput) {
+export async function upsertEntryAction(data: UpsertEntryInput): Promise<ActionResponse> {
   try {
-    const existing = await prisma.inspectionEntry.findFirst({
-      where: {
-        inspectionId: data.inspectionId,
-        departmentId: data.departmentId || null,
-        checklistItemKey: data.checklistItemKey,
-      }
-    });
-
-    if (existing) {
-      await prisma.inspectionEntry.update({
-        where: { id: existing.id },
-        data: {
-          complianceStatus: data.complianceStatus,
-          metadata: data.metadata || {},
-          observation: data.observation,
-          type: data.type,
-        },
-      });
-    } else {
-      await prisma.inspectionEntry.create({
-        data: {
-          inspectionId: data.inspectionId,
-          departmentId: data.departmentId,
-          type: data.type,
-          checklistItemKey: data.checklistItemKey,
-          complianceStatus: data.complianceStatus,
-          metadata: data.metadata || {},
-          observation: data.observation,
-        },
-      });
-    }
-
+    await InspectionService.upsertEntry(data);
     revalidatePath("/dashboard");
-    return { success: true };
+    return { success: true, data: null };
   } catch (error) {
-    console.error("Failed to upsert entry:", error);
-    return { success: false, error: "Falha ao salvar item da inspeção" };
+    const message = error instanceof AppError ? error.message : "Falha ao salvar item";
+    return { success: false, error: message };
   }
 }
 
-export async function deleteEntryAction(entryId: string) {
+export async function deleteEntryAction(entryId: string): Promise<ActionResponse> {
   try {
-    await prisma.inspectionEntry.delete({
-      where: { id: entryId },
-    });
+    await InspectionService.deleteEntry(entryId);
     revalidatePath("/dashboard");
-    return { success: true };
+    return { success: true, data: null };
   } catch (error) {
-    console.error("Failed to delete entry:", error);
-    return { success: false, error: "Falha ao remover item" };
+    const message = error instanceof AppError ? error.message : "Falha ao remover item";
+    return { success: false, error: message };
   }
 }
 
-export async function finalizeInspectionAction(id: string) {
+export async function finalizeInspectionAction(id: string): Promise<ActionResponse> {
   try {
-    await prisma.inspection.update({
-      where: { id },
-      data: {
-        status: "completed",
-        completedAt: new Date(),
-      },
-    });
+    await InspectionService.finalizeInspection(id);
     revalidatePath("/dashboard");
-    return { success: true };
+    return { success: true, data: null };
   } catch (error) {
-    console.error("Failed to finalize inspection:", error);
-    return { success: false, error: "Falha ao finalizar inspeção" };
+    const message = error instanceof AppError ? error.message : "Falha ao finalizar inspeção";
+    return { success: false, error: message };
   }
 }
 
@@ -135,17 +75,12 @@ export async function getFacilities() {
 }
 
 export async function getInspectionWithEntries(id: string) {
-  return prisma.inspection.findUnique({
-    where: { id },
-    include: {
-      entries: {
-        include: { department: true }
-      },
-      facility: {
-        include: { departments: true }
-      }
-    }
-  });
+  try {
+    return await InspectionService.getInspectionWithEntries(id);
+  } catch (error) {
+    console.error("Error fetching inspection details:", error);
+    return null;
+  }
 }
 
 export async function getRecentInspections() {
@@ -161,48 +96,4 @@ export async function getRecentInspections() {
       },
     },
   });
-}
-
-/**
- * Legado: Cria uma inspeção completa com múltiplos itens de uma vez.
- */
-export async function createInspection(data: {
-  facilityId: string;
-  departmentId?: string;
-  inspectorId: string;
-  entries: { checklistItemKey: string; complianceStatus: ComplianceStatus; observation?: string }[];
-}) {
-  try {
-    const result = await prisma.$transaction(async (tx) => {
-      const ins = await tx.inspection.create({
-        data: {
-          facilityId: data.facilityId,
-          inspectorId: data.inspectorId,
-          status: "completed",
-          completedAt: new Date(),
-        },
-      });
-
-      if (data.entries.length > 0) {
-        await tx.inspectionEntry.createMany({
-          data: data.entries.map(e => ({
-            inspectionId: ins.id,
-            departmentId: data.departmentId,
-            type: "checklist",
-            checklistItemKey: e.checklistItemKey,
-            complianceStatus: e.complianceStatus,
-            observation: e.observation,
-          })),
-        });
-      }
-
-      return ins;
-    });
-
-    revalidatePath("/dashboard");
-    return { success: true, id: result.id };
-  } catch (error) {
-    console.error("Failed to create complete inspection:", error);
-    return { success: false, error: "Erro ao criar inspeção completa" };
-  }
 }

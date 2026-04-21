@@ -36,14 +36,14 @@ export function VerificationHub({ facilities }: { facilities: Facility[] }) {
   const selectedFacility = facilities.find(f => f.id === facilityId);
 
   // Initialize or reload inspection
-  async function ensureInspection() {
-    if (!inspectionId && facilityId) {
+  async function ensureInspection(newFacilityId: string) {
+    if (!inspectionId && newFacilityId) {
       const res = await upsertInspectionAction({
-        facilityId,
+        facilityId: newFacilityId,
         inspectorId: "system-user",
       });
-      if (res.success && res.id) {
-        setInspectionId(res.id);
+      if (res.success && res.data?.id) {
+        setInspectionId(res.data.id);
       }
     }
   }
@@ -64,6 +64,10 @@ export function VerificationHub({ facilities }: { facilities: Facility[] }) {
   const handleAddItem = (mode: "staffing" | "inspection") => {
     if (!facilityId) {
       alert("Selecione uma unidade para começar.");
+      return;
+    }
+    if (!inspectionId) {
+      alert("Aguarde a inicialização da inspeção. Tente novamente em alguns segundos.");
       return;
     }
     setModalMode(mode);
@@ -124,7 +128,7 @@ export function VerificationHub({ facilities }: { facilities: Facility[] }) {
                   onValueChange={(val) => {
                     if (val) {
                       setFacilityId(val);
-                      ensureInspection();
+                      ensureInspection(val);
                     }
                   }} 
                   value={facilityId}

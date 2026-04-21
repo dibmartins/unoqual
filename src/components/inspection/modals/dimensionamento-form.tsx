@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { ComplianceStatus } from "@prisma/client";
 
 interface DimensionamentoFormProps {
   initialData?: any;
@@ -57,7 +58,7 @@ export function DimensionamentoForm({ initialData, onSubmit, isLoading, isMedica
     onSubmit({
       metadata: data,
       observation: data.observacoes,
-      complianceStatus: "compliant", // Placeholder status
+      complianceStatus: ComplianceStatus.COMPLIANT, // Placeholder status
     });
   };
 

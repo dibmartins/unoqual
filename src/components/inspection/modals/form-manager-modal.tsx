@@ -74,8 +74,9 @@ export function FormManagerModal({
     if (initialData) return false; // Allowed if editing
     
     const key = isFormTypeDimensionamento ? occupation : inspectionType;
+    const targetDeptId = departmentId === "facility-global" ? null : (departmentId || null);
     return existingEntries.some(e => 
-      e.departmentId === (departmentId || null) && 
+      e.departmentId === targetDeptId && 
       e.checklistItemKey === key
     );
   };
@@ -103,7 +104,7 @@ export function FormManagerModal({
     try {
       const res = await upsertEntryAction({
         inspectionId,
-        departmentId: departmentId || undefined,
+        departmentId: departmentId === "facility-global" ? undefined : departmentId || undefined,
         type: mode || "checklist",
         checklistItemKey: isFormTypeDimensionamento ? occupation : inspectionType,
         complianceStatus: data.complianceStatus || ComplianceStatus.COMPLIANT,
