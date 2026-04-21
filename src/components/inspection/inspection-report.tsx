@@ -154,10 +154,10 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
             <h3 className="text-sm font-black text-slate-900 border-l-4 border-emerald-600 pl-3 mb-4 uppercase tracking-wider">
               Conformidade Técnica e Processos
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {checkEntries.map((e: any) => (
                 <div key={e.id} className="p-4 border rounded-lg bg-slate-50/50">
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-4">
                     <div>
                       <span className="text-[10px] font-black text-slate-400 uppercase">{translate(e.checklistItemKey)}</span>
                       <h4 className="font-bold text-slate-800">{e.department?.name || "Geral"}</h4>
@@ -173,9 +173,32 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
                       <span className="text-xs font-bold uppercase">{translate(e.complianceStatus)}</span>
                     </div>
                   </div>
+
+                  {/* Detalhamento do Metadata */}
+                  {e.metadata && typeof e.metadata === 'object' && Object.keys(e.metadata).length > 0 && (
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4 bg-white p-3 rounded border border-slate-100">
+                      {Object.entries(e.metadata).map(([key, value]) => {
+                        if (key === 'observations') return null;
+                        let displayValue = String(value);
+                        if (value === true) displayValue = "Sim";
+                        if (value === false) displayValue = "Não";
+                        if (typeof value === 'string') displayValue = translate(value);
+                        
+                        return (
+                          <div key={key} className="flex flex-col border-b border-slate-50 pb-1">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">
+                              {key.replace(/([A-Z])/g, ' $1').trim()}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-700">{displayValue}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   {e.observation && (
                     <p className="text-xs text-slate-600 italic mt-2 border-t pt-2 border-slate-200">
-                      "{e.observation}"
+                      <strong>Parecer do Auditor:</strong> "{e.observation}"
                     </p>
                   )}
                 </div>
@@ -183,6 +206,24 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
             </div>
           </div>
         )}
+
+        {/* Áreas de Assinatura */}
+        <div className="mt-20 grid grid-cols-2 gap-12">
+          <div className="text-center">
+            <div className="border-t border-slate-400 pt-2 mx-4">
+              <p className="text-xs font-bold text-slate-800">
+                {inspection.inspectorId === "system-user" ? "Diego Martins" : inspection.inspectorId}
+              </p>
+              <p className="text-[10px] text-slate-500 uppercase font-medium">Responsável Técnico / Auditor</p>
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="border-t border-slate-400 pt-2 mx-4">
+              <p className="text-xs font-bold text-slate-800">Assinatura do Gestor da Unidade</p>
+              <p className="text-[10px] text-slate-500 uppercase font-medium">Responsável Técnico da Unidade</p>
+            </div>
+          </div>
+        </div>
 
         {/* Rodapé Interno do PDF */}
         <div className="absolute bottom-12 left-12 right-12 border-t pt-4 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
