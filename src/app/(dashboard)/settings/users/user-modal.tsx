@@ -120,7 +120,7 @@ export function UserModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
               <Label htmlFor="user-role">Perfil de Acesso</Label>
               <Select 
                 onValueChange={(val: any) => setFormData({ ...formData, role: val })} 
-                defaultValue={formData.role}
+                value={formData.role}
               >
                 <SelectTrigger id="user-role">
                   <SelectValue placeholder="Selecione um perfil" />

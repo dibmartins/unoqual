@@ -4,10 +4,23 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { InspectionService, UpsertInspectionInput, UpsertEntryInput, CreateInspectionCompleteInput } from "@/services/inspection.service";
 import { ActionResponse, AppError } from "@/lib/errors";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function createInspection(data: CreateInspectionCompleteInput): Promise<ActionResponse<{ id: string }>> {
+async function getSessionOrThrow() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw AppError.unauthorized("Não autenticado");
+  return session;
+}
+
+export async function createInspection(data: Omit<CreateInspectionCompleteInput, "userId" | "organizationId">): Promise<ActionResponse<{ id: string }>> {
   try {
-    const result = await InspectionService.createInspectionComplete(data);
+    const session = await getSessionOrThrow();
+    const result = await InspectionService.createInspectionComplete({
+      ...data,
+      userId: session.user.id,
+      organizationId: session.user.organizationId
+    });
     revalidatePath("/dashboard");
     return { success: true, data: { id: result.id } };
   } catch (error) {
@@ -19,9 +32,14 @@ export async function createInspection(data: CreateInspectionCompleteInput): Pro
 /**
  * Creates or updates the base Inspection record.
  */
-export async function upsertInspectionAction(data: UpsertInspectionInput): Promise<ActionResponse<{ id: string }>> {
+export async function upsertInspectionAction(data: Omit<UpsertInspectionInput, "userId" | "organizationId">): Promise<ActionResponse<{ id: string }>> {
   try {
-    const inspection = await InspectionService.upsertInspection(data);
+    const session = await getSessionOrThrow();
+    const inspection = await InspectionService.upsertInspection({
+      ...data,
+      userId: session.user.id,
+      organizationId: session.user.organizationId
+    });
     return { success: true, data: { id: inspection.id } };
   } catch (error) {
     const message = error instanceof AppError ? error.message : "Falha ao salvar inspeção";
@@ -32,9 +50,14 @@ export async function upsertInspectionAction(data: UpsertInspectionInput): Promi
 /**
  * Adds or updates an entry (checklist or dimensionamento) in the inspection.
  */
-export async function upsertEntryAction(data: UpsertEntryInput): Promise<ActionResponse> {
+export async function upsertEntryAction(data: Omit<UpsertEntryInput, "userId" | "organizationId">): Promise<ActionResponse> {
   try {
-    await InspectionService.upsertEntry(data);
+    const session = await getSessionOrThrow();
+    await InspectionService.upsertEntry({
+      ...data,
+      userId: session.user.id,
+      organizationId: session.user.organizationId
+    });
     revalidatePath("/dashboard");
     return { success: true, data: null };
   } catch (error) {
@@ -45,7 +68,8 @@ export async function upsertEntryAction(data: UpsertEntryInput): Promise<ActionR
 
 export async function deleteEntryAction(entryId: string): Promise<ActionResponse> {
   try {
-    await InspectionService.deleteEntry(entryId);
+    const session = await getSessionOrThrow();
+    await InspectionService.deleteEntry(entryId, session.user.id, session.user.organizationId);
     revalidatePath("/dashboard");
     return { success: true, data: null };
   } catch (error) {
@@ -56,7 +80,8 @@ export async function deleteEntryAction(entryId: string): Promise<ActionResponse
 
 export async function finalizeInspectionAction(id: string): Promise<ActionResponse> {
   try {
-    await InspectionService.finalizeInspection(id);
+    const session = await getSessionOrThrow();
+    await InspectionService.finalizeInspection(id, session.user.id, session.user.organizationId);
     revalidatePath("/dashboard");
     return { success: true, data: null };
   } catch (error) {
@@ -66,7 +91,11 @@ export async function finalizeInspectionAction(id: string): Promise<ActionRespon
 }
 
 export async function getFacilities() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return [];
+
   return prisma.facility.findMany({
+    where: { organizationId: session.user.organizationId },
     include: {
       departments: true,
     },
@@ -76,7 +105,9 @@ export async function getFacilities() {
 
 export async function getInspectionWithEntries(id: string) {
   try {
-    return await InspectionService.getInspectionWithEntries(id);
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return null;
+    return await InspectionService.getInspectionWithEntries(id, session.user.organizationId);
   } catch (error) {
     console.error("Error fetching inspection details:", error);
     return null;
@@ -84,7 +115,11 @@ export async function getInspectionWithEntries(id: string) {
 }
 
 export async function getRecentInspections() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return [];
+
   return prisma.inspection.findMany({
+    where: { facility: { organizationId: session.user.organizationId } },
     take: 10,
     orderBy: {
       createdAt: "desc",

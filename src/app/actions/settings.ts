@@ -3,31 +3,29 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { AppError } from "@/lib/errors";
+
+async function getSessionOrThrow() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw AppError.unauthorized("Não autenticado");
+  return session;
+}
 
 export async function getOrganization() {
   try {
-    let org = await prisma.organization.findFirst({
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return null;
+
+    return await prisma.organization.findUnique({
+      where: { id: session.user.organizationId },
       include: {
         _count: {
           select: { facilities: true, users: true }
         }
       }
     });
-    
-    if (!org) {
-      org = await prisma.organization.create({
-        data: { 
-          name: "Nova Organização", 
-          cnpj: "00.000.000/0000-00",
-        },
-        include: {
-          _count: {
-            select: { facilities: true, users: true }
-          }
-        }
-      });
-    }
-    return org;
   } catch (error) {
     console.error("Erro ao buscar organização:", error);
     return null;
@@ -36,6 +34,13 @@ export async function getOrganization() {
 
 export async function updateOrganization(id: string, data: { name: string; cnpj: string; address?: string; phone?: string }) {
   try {
+    const session = await getSessionOrThrow();
+    
+    // Security: Ensure user belongs to the organization they are updating
+    if (session.user.organizationId !== id) {
+      throw new AppError("Acesso negado", "FORBIDDEN", 403);
+    }
+
     await prisma.organization.update({
       where: { id },
       data,
@@ -44,17 +49,18 @@ export async function updateOrganization(id: string, data: { name: string; cnpj:
     return { success: true };
   } catch (error) {
     console.error("Erro ao atualizar organização:", error);
-    return { success: false, error: "Falha ao atualizar os dados da organização." };
+    const message = error instanceof AppError ? error.message : "Falha ao atualizar os dados da organização.";
+    return { success: false, error: message };
   }
 }
 
 export async function getUsers() {
   try {
-    const org = await prisma.organization.findFirst();
-    if (!org) return [];
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return [];
     
     return await prisma.user.findMany({
-      where: { organizationId: org.id },
+      where: { organizationId: session.user.organizationId },
       orderBy: { name: "asc" },
       select: {
         id: true,
@@ -72,8 +78,12 @@ export async function getUsers() {
 
 export async function createUser(data: { name: string; email: string; passwordHash: string; role: "ADMIN" | "GESTOR" | "CONSULTOR" }) {
   try {
-    const org = await prisma.organization.findFirst();
-    if (!org) throw new Error("Organização não encontrada");
+    const session = await getSessionOrThrow();
+
+    // Only ADMIN/GESTOR should create users
+    if (session.user.role === "CONSULTOR") {
+      throw new AppError("Permissão insuficiente", "FORBIDDEN", 403);
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.passwordHash, salt);
@@ -84,7 +94,7 @@ export async function createUser(data: { name: string; email: string; passwordHa
         email: data.email,
         password: hashedPassword,
         role: data.role,
-        organizationId: org.id,
+        organizationId: session.user.organizationId,
       },
     });
     
@@ -95,24 +105,19 @@ export async function createUser(data: { name: string; email: string; passwordHa
     if ((error as any).code === "P2002") {
       return { success: false, error: "Este e-mail já está em uso." };
     }
-    return { success: false, error: "Falha ao criar o usuário." };
+    const message = error instanceof AppError ? error.message : "Falha ao criar o usuário.";
+    return { success: false, error: message };
   }
 }
 
 export async function createFacility(data: { name: string; address?: string }) {
   try {
-    // Busca a primeira organização (ou cria uma default)
-    let org = await prisma.organization.findFirst();
-    if (!org) {
-      org = await prisma.organization.create({
-        data: { name: "Organização Padrão", cnpj: "00000000000000" }
-      });
-    }
+    const session = await getSessionOrThrow();
 
     await prisma.facility.create({
       data: {
         name: data.name,
-        organizationId: org.id,
+        organizationId: session.user.organizationId,
         size: "MEDIUM", // Valor padrão
         bedCapacity: 0, // Valor padrão
       },
@@ -121,12 +126,21 @@ export async function createFacility(data: { name: string; address?: string }) {
     return { success: true };
   } catch (error) {
     console.error("Erro ao criar unidade:", error);
-    return { success: false, error: "Falha ao criar a Unidade de Saúde." };
+    const message = error instanceof AppError ? error.message : "Falha ao criar a Unidade de Saúde.";
+    return { success: false, error: message };
   }
 }
 
 export async function createDepartment(data: { facilityId: string; name: string; classification?: string; hasNursing?: boolean }) {
   try {
+    const session = await getSessionOrThrow();
+
+    // Verify facility belongs to organization
+    const facility = await prisma.facility.findFirst({
+      where: { id: data.facilityId, organizationId: session.user.organizationId }
+    });
+    if (!facility) throw AppError.notFound("Unidade não encontrada nesta organização");
+
     await prisma.department.create({
       data: {
         facilityId: data.facilityId,
@@ -139,6 +153,7 @@ export async function createDepartment(data: { facilityId: string; name: string;
     return { success: true };
   } catch (error) {
     console.error("Erro ao criar setor:", error);
-    return { success: false, error: "Falha ao criar o Setor." };
+    const message = error instanceof AppError ? error.message : "Falha ao criar o Setor.";
+    return { success: false, error: message };
   }
 }
