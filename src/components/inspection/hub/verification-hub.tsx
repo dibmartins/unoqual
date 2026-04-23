@@ -114,142 +114,148 @@ export function VerificationHub({
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-6 sm:py-10 px-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+    <div className="max-w-4xl mx-auto py-6 sm:py-10 px-4 space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-3 text-slate-900">
-            <ClipboardCheck className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
+            <div className="p-2.5 bg-blue-100 rounded-xl">
+              <ClipboardCheck className="w-7 h-7 sm:w-8 sm:h-8 text-blue-600" />
+            </div>
             Nova Visita Técnica
           </h1>
-          <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium">Gestão Integrada de Verificações e Dimensionamento</p>
+          <p className="text-slate-500 mt-2 text-sm font-medium">Gestão Integrada de Verificações e Dimensionamento</p>
         </div>
         
-        <Badge variant="outline" className="bg-blue-50/50 text-blue-700 border-blue-200 px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold w-fit">
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold">
           {inspectionId ? `ID: ${inspectionId.split('-')[0]}` : "Novo Rascunho"}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
-        {/* Sidebar: Configurações Globais */}
-        <div className="space-y-6 lg:order-1 order-1">
-          <Card className="border-slate-200 shadow-sm overflow-hidden">
-            <CardHeader className="bg-slate-50/50 border-b p-4">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-slate-400" />
-                Configurações
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Unidade de Saúde</Label>
-                <Select 
-                  onValueChange={(val) => {
-                    if (val) {
-                      setFacilityId(val);
-                      ensureInspection(val);
-                    }
-                  }} 
-                  value={facilityId}
-                  disabled={!!inspectionId && entries.length > 0}
-                >
-                  <SelectTrigger className="h-12 bg-white border-slate-200">
-                    <SelectValue placeholder="Selecione...">
-                      {facilities.find(f => f.id === facilityId)?.name}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {facilities.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Inspetor Responsável</Label>
-                <div className="flex items-center gap-2 p-3 rounded-lg border bg-slate-50/50 text-sm h-12">
-                  <User className="w-4 h-4 text-slate-400" />
-                  <span className="font-medium">Diego Martins</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Button 
-            className="w-full h-14 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 text-lg font-bold flex items-center justify-center gap-2"
-            disabled={!inspectionId || entries.length === 0 || isFinishing}
-            onClick={handleFinish}
-          >
-            {isFinishing ? "Processando..." : (
-              <>
-                <Save className="w-5 h-5" />
-                Finalizar Auditoria
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Main Feed: Itens de Inspeção */}
-        <div className="lg:col-span-3 space-y-6 sm:space-y-8 lg:order-2 order-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <Button 
-                variant="outline" 
-                className="h-24 sm:h-28 border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 group flex flex-col gap-2 rounded-2xl transition-all"
-                onClick={() => handleAddItem("staffing")}
-              >
-                <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform">
-                  <Calculator className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div className="text-emerald-800 font-bold text-sm sm:text-base">Incluir Dimensionamento</div>
-             </Button>
-
-             <Button 
-                variant="outline" 
-                className="h-24 sm:h-28 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 group flex flex-col gap-2 rounded-2xl transition-all"
-                onClick={() => handleAddItem("inspection")}
-              >
-                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
-                  <ClipboardCheck className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div className="text-blue-800 font-bold text-sm sm:text-base">Incluir Inspeção de Setor</div>
-             </Button>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-800">Itens Verificados</h2>
-              <Badge variant="secondary" className="bg-slate-100 text-slate-600">{entries.length} itens</Badge>
-            </div>
-
-            {entries.length === 0 ? (
-              <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/30">
-                <div className="flex justify-center mb-4">
-                  <Plus className="w-12 h-12 text-slate-200" />
-                </div>
-                <p className="text-slate-400 font-medium">Nenhum item adicionado à inspeção ainda.</p>
-                <p className="text-slate-300 text-sm">Adicione dimensionamentos ou veriticações acima.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {entries.map((entry) => (
-                  <ItemCard
-                    key={entry.id}
-                    type={entry.type}
-                    checklistItemKey={entry.checklistItemKey}
-                    complianceStatus={entry.complianceStatus}
-                    departmentName={entry.department?.name}
-                    metadata={entry.metadata}
-                    onEdit={() => {
-                      setEditingEntry(entry);
-                      setModalMode(entry.type === "staffing" ? "staffing" : "inspection");
-                    }}
-                    onDelete={() => handleDelete(entry.id)}
-                  />
+      {/* Configurações Globais */}
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <CardContent className="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white">
+          <div className="space-y-2">
+            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Unidade de Saúde</Label>
+            <Select 
+              onValueChange={(val) => {
+                if (val) {
+                  setFacilityId(val);
+                  ensureInspection(val);
+                }
+              }} 
+              value={facilityId}
+              disabled={!!inspectionId && entries.length > 0}
+            >
+              <SelectTrigger className="h-12 bg-white border-slate-200 hover:border-slate-300 transition-colors">
+                <SelectValue placeholder="Selecione a Unidade...">
+                  {facilities.find(f => f.id === facilityId)?.name}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {facilities.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
                 ))}
-              </div>
+              </SelectContent>
+            </Select>
+            {!!inspectionId && entries.length > 0 && (
+              <p className="text-[10px] text-amber-600 font-medium">Não é possível alterar a unidade apó adicionarmos itens.</p>
             )}
           </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Inspetor Responsável</Label>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50 shadow-sm h-12">
+              <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-slate-500" />
+              </div>
+              <span className="font-semibold text-slate-700 text-sm">Diego Martins</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Botões de Ação Principais */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <Button 
+            variant="outline" 
+            className="h-28 sm:h-32 border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 group flex flex-col gap-3 rounded-2xl transition-all shadow-sm"
+            onClick={() => handleAddItem("staffing")}
+          >
+            <div className="p-3 bg-emerald-100/50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-emerald-100">
+              <Calculator className="w-6 h-6 sm:w-7 sm:h-7" />
+            </div>
+            <div className="text-emerald-800 font-bold text-sm sm:text-base">Incluir Dimensionamento</div>
+         </Button>
+
+         <Button 
+            variant="outline" 
+            className="h-28 sm:h-32 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 group flex flex-col gap-3 rounded-2xl transition-all shadow-sm"
+            onClick={() => handleAddItem("inspection")}
+          >
+            <div className="p-3 bg-blue-100/50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-blue-100">
+              <ClipboardCheck className="w-6 h-6 sm:w-7 sm:h-7" />
+            </div>
+            <div className="text-blue-800 font-bold text-sm sm:text-base">Incluir Inspeção de Setor</div>
+         </Button>
+      </div>
+
+      {/* Lista de Itens */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <h2 className="text-xl font-bold text-slate-800">
+            Itens Verificados
+          </h2>
+          <Badge variant="secondary" className="bg-slate-100 text-slate-600 rounded-full px-3">{entries.length} itens</Badge>
         </div>
+
+        {entries.length === 0 ? (
+          <div className="py-16 sm:py-20 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 bg-white rounded-full shadow-sm border border-slate-100">
+                <Plus className="w-8 h-8 text-slate-300" />
+              </div>
+            </div>
+            <p className="text-slate-500 font-bold text-lg mb-1">Lista Vazia</p>
+            <p className="text-slate-400 text-sm max-w-[280px] mx-auto">
+              Selecione uma unidade acima e adicione dimensionamentos ou verificações.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {entries.map((entry) => (
+              <ItemCard
+                key={entry.id}
+                type={entry.type}
+                checklistItemKey={entry.checklistItemKey}
+                complianceStatus={entry.complianceStatus}
+                departmentName={entry.department?.name}
+                metadata={entry.metadata}
+                onEdit={() => {
+                  setEditingEntry(entry);
+                  setModalMode(entry.type === "staffing" ? "staffing" : "inspection");
+                }}
+                onDelete={() => handleDelete(entry.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* CTA Inferior */}
+      <div className="pt-6 mt-4 flex justify-end">
+        <Button 
+          className="w-full sm:w-auto h-14 px-8 bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 text-lg font-bold flex items-center justify-center gap-3 rounded-xl transition-all disabled:opacity-50 disabled:shadow-none"
+          disabled={!inspectionId || entries.length === 0 || isFinishing}
+          onClick={handleFinish}
+        >
+          {isFinishing ? "Processando..." : (
+            <>
+              <Save className="w-5 h-5" />
+              Finalizar Auditoria
+            </>
+          )}
+        </Button>
       </div>
 
       {selectedFacility && (
