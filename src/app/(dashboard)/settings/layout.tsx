@@ -30,20 +30,20 @@ export default function SettingsLayout({
   ];
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-8">
+    <div className="max-w-6xl mx-auto py-6 sm:py-10 px-4 sm:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-slate-900">Configurações</h1>
-        <p className="text-slate-500 font-medium">Gerencie sua organização, usuários e unidades de saúde</p>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Configurações</h1>
+        <p className="text-slate-500 font-medium text-sm sm:text-base">Gerencie sua organização, usuários e unidades de saúde</p>
       </div>
 
-      <div className="flex gap-2 border-b border-slate-200 mb-8">
+      <div className="flex overflow-x-auto pb-px gap-1 border-b border-slate-200 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-all font-bold text-sm ${
+              className={`flex items-center gap-2 px-4 sm:px-6 py-3 border-b-2 transition-all font-bold text-xs sm:text-sm whitespace-nowrap ${
                 isActive
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"

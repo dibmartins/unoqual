@@ -54,7 +54,7 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
       </div>
 
       {/* Papel do Laudo (Simulado) */}
-      <div className="bg-white shadow-2xl border border-slate-200 mx-auto max-w-[800px] min-h-[1000px] p-12 relative overflow-hidden">
+      <div className="bg-white shadow-2xl border border-slate-200 mx-auto max-w-[800px] min-h-[1050px] p-8 pb-24 relative overflow-hidden">
         {/* Marca d'água de rascunho se não estiver completo */}
         {!isCompleted && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] rotate-[-45deg]">
@@ -63,79 +63,75 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
         )}
 
         {/* Cabeçalho do Documento */}
-        <div className="border-b-4 border-slate-800 pb-8 mb-10 flex justify-between items-end">
+        <div className="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-end">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter">UNOQUAL</h1>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Gestão de Qualidade</p>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tighter">UNOQUAL</h1>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Gestão de Qualidade</p>
           </div>
           <div className="text-right">
-            <h2 className="text-xl font-bold text-slate-800">LAUDO DE INSPEÇÃO</h2>
-            <p className="text-sm font-medium text-slate-500">Ref: {inspection.id.substring(0, 8).toUpperCase()}</p>
+            <h2 className="text-lg font-bold text-slate-800">LAUDO DE INSPEÇÃO</h2>
+            <p className="text-xs font-medium text-slate-500">Ref: {inspection.id.substring(0, 8).toUpperCase()}</p>
           </div>
         </div>
 
         {/* Grid de Informações */}
-        <div className="grid grid-cols-2 gap-8 mb-12">
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Unidade de Saúde</label>
-              <div className="flex items-center gap-2 mt-1">
-                <Building2 className="w-4 h-4 text-slate-400" />
-                <span className="font-bold text-slate-800">{inspection.facility.name}</span>
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Inspetor Responsável</label>
-              <div className="flex items-center gap-2 mt-1">
-                <User className="w-4 h-4 text-slate-400" />
-                <span className="font-bold text-slate-800">
-                  {inspection.inspectorId === "system-user" ? "Diego Martins" : inspection.inspectorId}
-                </span>
-              </div>
+        <div className="grid grid-cols-2 gap-y-4 gap-x-8 mb-8 pb-6 border-b border-slate-100">
+          <div>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-0.5">Unidade de Saúde</label>
+            <div className="flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-sm font-bold text-slate-800">{inspection.facility.name}</span>
             </div>
           </div>
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Data da Inspeção</label>
-              <div className="flex items-center gap-2 mt-1">
-                <Calendar className="w-4 h-4 text-slate-400" />
-                <span className="font-bold text-slate-800">{reportDate}</span>
-              </div>
+          <div>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-0.5">Data da Inspeção</label>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-sm font-bold text-slate-800">{reportDate}</span>
             </div>
+          </div>
+          <div>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-0.5">Inspetor Responsável</label>
+            <div className="flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-sm font-bold text-slate-800">
+                {inspection.inspectorId === "system-user" ? "Diego Martins" : inspection.inspectorId}
+              </span>
+            </div>
+          </div>
+          <div>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-0.5">Status do Laudo</label>
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Status do Laudo</label>
-              <div className="mt-1">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                  isCompleted ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                }`}>
-                  {translate(inspection.status)}
-                </span>
-              </div>
+              <span className={`px-2 py-0.5 rounded text-[9px] tracking-wider font-black uppercase ${
+                isCompleted ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+              }`}>
+                {translate(inspection.status)}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Seção de Dimensionamento */}
         {staffingEntries.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-sm font-black text-slate-900 border-l-4 border-blue-600 pl-3 mb-4 uppercase tracking-wider">
+          <div className="mb-8">
+            <h3 className="text-sm font-black text-slate-900 border-l-4 border-blue-600 pl-2 mb-3 uppercase tracking-wider">
               Resultados de Dimensionamento
             </h3>
             <div className="border rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs">
                 <thead className="bg-slate-50 border-b">
                   <tr>
-                    <th className="px-4 py-2 text-left font-bold text-slate-600">Setor</th>
-                    <th className="px-4 py-2 text-left font-bold text-slate-600">Ocupação</th>
-                    <th className="px-4 py-2 text-left font-bold text-slate-600">Resultado</th>
+                    <th className="px-3 py-1.5 text-left font-bold text-slate-600">Setor</th>
+                    <th className="px-3 py-1.5 text-left font-bold text-slate-600">Ocupação</th>
+                    <th className="px-3 py-1.5 text-left font-bold text-slate-600">Resultado</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {staffingEntries.map((e: any) => (
                     <tr key={e.id}>
-                      <td className="px-4 py-3 font-medium text-slate-700">{e.department?.name || "Unidade"}</td>
-                      <td className="px-4 py-3 text-slate-600">{e.metadata?.professionalClass || "N/A"}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 font-medium text-slate-700">{e.department?.name || "Unidade"}</td>
+                      <td className="px-3 py-2 text-slate-600">{e.metadata?.professionalClass || "N/A"}</td>
+                      <td className="px-3 py-2">
                         <span className={`font-bold ${e.complianceStatus === 'compliant' ? 'text-green-600' : 'text-red-600'}`}>
                           {translate(e.complianceStatus)}
                         </span>
@@ -150,33 +146,33 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
 
         {/* Seção de Conformidade Técnica */}
         {checkEntries.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-sm font-black text-slate-900 border-l-4 border-emerald-600 pl-3 mb-4 uppercase tracking-wider">
+          <div className="mb-8">
+            <h3 className="text-sm font-black text-slate-900 border-l-4 border-emerald-600 pl-2 mb-3 uppercase tracking-wider">
               Conformidade Técnica e Processos
             </h3>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {checkEntries.map((e: any) => (
-                <div key={e.id} className="p-4 border rounded-lg bg-slate-50/50">
-                  <div className="flex justify-between items-start mb-4">
+                <div key={e.id} className="p-3 border rounded-lg bg-white">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
                       <span className="text-[10px] font-black text-slate-400 uppercase">{translate(e.checklistItemKey)}</span>
-                      <h4 className="font-bold text-slate-800">{e.department?.name || "Geral"}</h4>
+                      <h4 className="font-bold text-sm text-slate-800">{e.department?.name || "Geral"}</h4>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       {e.complianceStatus === 'compliant' ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
                       ) : e.complianceStatus === 'non_compliant' ? (
-                        <XCircle className="w-4 h-4 text-red-600" />
+                        <XCircle className="w-3.5 h-3.5 text-red-600" />
                       ) : (
-                        <HelpCircle className="w-4 h-4 text-slate-400" />
+                        <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
                       )}
-                      <span className="text-xs font-bold uppercase">{translate(e.complianceStatus)}</span>
+                      <span className="text-[10px] font-bold uppercase">{translate(e.complianceStatus)}</span>
                     </div>
                   </div>
 
                   {/* Detalhamento do Metadata */}
                   {e.metadata && typeof e.metadata === 'object' && Object.keys(e.metadata).length > 0 && (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4 bg-white p-3 rounded border border-slate-100">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-2.5 bg-white p-2 rounded border border-slate-100">
                       {Object.entries(e.metadata).map(([key, value]) => {
                         if (key === 'observations') return null;
                         let displayValue = String(value);
@@ -185,11 +181,11 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
                         if (typeof value === 'string') displayValue = translate(value);
                         
                         return (
-                          <div key={key} className="flex flex-col border-b border-slate-50 pb-1">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">
+                          <div key={key} className="flex flex-col border-b border-slate-50 pb-0.5">
+                            <span className="text-[8px] font-bold text-slate-400 uppercase leading-none mb-0.5">
                               {key.replace(/([A-Z])/g, ' $1').trim()}
                             </span>
-                            <span className="text-[11px] font-semibold text-slate-700">{displayValue}</span>
+                            <span className="text-[10px] font-semibold text-slate-700">{displayValue}</span>
                           </div>
                         );
                       })}
@@ -197,7 +193,7 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
                   )}
 
                   {e.observation && (
-                    <p className="text-xs text-slate-600 italic mt-2 border-t pt-2 border-slate-200">
+                    <p className="text-[11px] text-slate-600 italic mt-2 border-t pt-2 border-slate-200">
                       <strong>Parecer do Auditor:</strong> "{e.observation}"
                     </p>
                   )}
@@ -208,25 +204,25 @@ export function InspectionReport({ inspection }: InspectionReportProps) {
         )}
 
         {/* Áreas de Assinatura */}
-        <div className="mt-20 grid grid-cols-2 gap-12">
+        <div className="mt-12 pb-8 grid grid-cols-2 gap-8">
           <div className="text-center">
-            <div className="border-t border-slate-400 pt-2 mx-4">
-              <p className="text-xs font-bold text-slate-800">
+            <div className="border-t border-slate-400 pt-2 mx-2">
+              <p className="text-[11px] font-bold text-slate-800">
                 {inspection.inspectorId === "system-user" ? "Diego Martins" : inspection.inspectorId}
               </p>
-              <p className="text-[10px] text-slate-500 uppercase font-medium">Responsável Técnico / Auditor</p>
+              <p className="text-[9px] text-slate-500 uppercase font-medium">Responsável Técnico / Auditor</p>
             </div>
           </div>
           <div className="text-center">
-            <div className="border-t border-slate-400 pt-2 mx-4">
-              <p className="text-xs font-bold text-slate-800">Assinatura do Gestor da Unidade</p>
-              <p className="text-[10px] text-slate-500 uppercase font-medium">Responsável Técnico da Unidade</p>
+            <div className="border-t border-slate-400 pt-2 mx-2">
+              <p className="text-[11px] font-bold text-slate-800">Assinatura do Gestor da Unidade</p>
+              <p className="text-[9px] text-slate-500 uppercase font-medium">Responsável Técnico da Unidade</p>
             </div>
           </div>
         </div>
 
         {/* Rodapé Interno do PDF */}
-        <div className="absolute bottom-12 left-12 right-12 border-t pt-4 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <div className="absolute bottom-8 left-8 right-8 border-t pt-3 flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">
           <span>Unoqual © {new Date().getFullYear()}</span>
           <span>Autenticidade: {inspection.id}</span>
         </div>

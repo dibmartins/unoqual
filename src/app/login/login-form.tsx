@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { ShieldCheck, Loader2, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
@@ -24,6 +24,7 @@ export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -117,13 +118,22 @@ export function LoginForm() {
                       Esqueceu a senha?
                     </Button>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    className="h-11 border-slate-200 bg-white focus:ring-blue-500/20"
-                    {...register("password")}
-                    autoComplete="current-password"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      className="h-11 border-slate-200 bg-white focus:ring-blue-500/20 pr-10"
+                      {...register("password")}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-0 top-0 h-11 w-11 flex items-center justify-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="text-[11px] font-medium text-red-500">{errors.password.message}</p>
                   )}

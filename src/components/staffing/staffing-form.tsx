@@ -308,26 +308,26 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                 </CardTitle>
                 <CardDescription>Quantidade de pacientes por nível de complexidade assistencial.</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-500">Mínimo (PCM)</Label>
-                  <Input type="number" {...form.register("pcm")} />
+                  <Label className="text-sm font-semibold text-slate-700">Mínimo (PCM)</Label>
+                  <Input type="number" inputMode="numeric" {...form.register("pcm")} className="h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-500">Intermed. (PCI)</Label>
-                  <Input type="number" {...form.register("pci")} />
+                  <Label className="text-sm font-semibold text-slate-700">Intermed. (PCI)</Label>
+                  <Input type="number" inputMode="numeric" {...form.register("pci")} className="h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-500">Alta Dep. (PCAD)</Label>
-                  <Input type="number" {...form.register("pcad")} />
+                  <Label className="text-sm font-semibold text-slate-700">Alta Dep. (PCAD)</Label>
+                  <Input type="number" inputMode="numeric" {...form.register("pcad")} className="h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-500">Semi-Int. (PCSI)</Label>
-                  <Input type="number" {...form.register("pcsi")} />
+                  <Label className="text-sm font-semibold text-slate-700">Semi-Int. (PCSI)</Label>
+                  <Input type="number" inputMode="numeric" {...form.register("pcsi")} className="h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-500">Intensivo (PCIt)</Label>
-                  <Input type="number" {...form.register("pcit")} />
+                  <Label className="text-sm font-semibold text-slate-700">Intensivo (PCIt)</Label>
+                  <Input type="number" inputMode="numeric" {...form.register("pcit")} className="h-12" />
                 </div>
               </CardContent>
             </Card>
@@ -363,12 +363,12 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Enfermeiros Atuais</Label>
-                    <Input type="number" {...form.register("currentNurses")} />
+                    <Label className="text-sm font-semibold text-slate-700">Enfermeiros Atuais</Label>
+                    <Input type="number" inputMode="numeric" {...form.register("currentNurses")} className="h-12" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Técnicos Atuais</Label>
-                    <Input type="number" {...form.register("currentTechs")} />
+                    <Label className="text-sm font-semibold text-slate-700">Técnicos Atuais</Label>
+                    <Input type="number" inputMode="numeric" {...form.register("currentTechs")} className="h-12" />
                   </div>
                 </div>
               </CardContent>

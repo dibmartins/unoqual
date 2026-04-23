@@ -64,10 +64,10 @@ const QuestionItem = ({
   form
 }: QuestionItemProps) => {
   return (
-    <div className="flex flex-col space-y-3 p-4 rounded-xl border bg-slate-50/50">
+    <div className="flex flex-col space-y-4 p-5 rounded-xl border bg-slate-50/50">
       <div className="flex items-start gap-3">
-        {Icon && <Icon className="w-5 h-5 text-slate-400 mt-0.5" />}
-        <Label className="text-base font-medium leading-tight">{label}</Label>
+        {Icon && <Icon className="w-5 h-5 text-slate-400 mt-1" />}
+        <Label className="text-base font-semibold leading-tight">{label}</Label>
       </div>
       
       <Controller
@@ -77,19 +77,19 @@ const QuestionItem = ({
           <RadioGroup 
             onValueChange={field.onChange}
             value={field.value}
-            className="flex gap-4"
+            className="flex flex-wrap gap-6"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <RadioGroupItem value={ComplianceStatus.COMPLIANT} id={`${name}-c`} className="text-green-600 border-green-200" />
-              <Label htmlFor={`${name}-c`} className="text-sm cursor-pointer">Conforme</Label>
+              <Label htmlFor={`${name}-c`} className="text-sm font-medium cursor-pointer py-2 px-1">Conforme</Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <RadioGroupItem value={ComplianceStatus.NON_COMPLIANT} id={`${name}-n`} className="text-red-600 border-red-200" />
-              <Label htmlFor={`${name}-n`} className="text-sm cursor-pointer">Não Conf.</Label>
+              <Label htmlFor={`${name}-n`} className="text-sm font-medium cursor-pointer py-2 px-1">Não Conf.</Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <RadioGroupItem value={ComplianceStatus.NOT_APPLICABLE} id={`${name}-na`} className="text-slate-400" />
-              <Label htmlFor={`${name}-na`} className="text-sm cursor-pointer">N/A</Label>
+              <Label htmlFor={`${name}-na`} className="text-sm font-medium cursor-pointer py-2 px-1">N/A</Label>
             </div>
           </RadioGroup>
         )}
@@ -285,11 +285,21 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
           </CardContent>
         </Card>
 
-        <div className="flex gap-4 justify-end items-center sticky bottom-8 bg-white/80 backdrop-blur p-4 border rounded-2xl shadow-lg">
-          <Button type="button" variant="ghost" className="text-slate-500" onClick={() => form.reset()} disabled={isSubmitting}>
-            Limpar
+        <div className="flex flex-col sm:flex-row gap-4 justify-end items-center sticky bottom-0 sm:bottom-8 bg-white/95 backdrop-blur-md p-4 sm:p-6 border-t sm:border sm:rounded-2xl shadow-lg z-10 -mx-4 sm:mx-0">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            className="w-full sm:w-auto text-slate-500 order-2 sm:order-1" 
+            onClick={() => form.reset()} 
+            disabled={isSubmitting}
+          >
+            Limpar Formulário
           </Button>
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 px-12 py-6 text-lg font-bold" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 sm:px-12 py-6 text-lg font-bold order-1 sm:order-2" 
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "Salvando..." : "Finalizar Inspeção"}
           </Button>
         </div>

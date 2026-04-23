@@ -114,26 +114,24 @@ export function VerificationHub({
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-5xl mx-auto py-6 sm:py-10 px-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black flex items-center gap-3 text-slate-900">
-            <ClipboardCheck className="w-10 h-10 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-3 text-slate-900">
+            <ClipboardCheck className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
             Nova Visita Técnica
           </h1>
-          <p className="text-slate-500 mt-2 font-medium">Gestão Integrada de Verificações e Dimensionamento</p>
+          <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium">Gestão Integrada de Verificações e Dimensionamento</p>
         </div>
         
-        <div className="flex gap-2">
-          <Badge variant="outline" className="bg-blue-50/50 text-blue-700 border-blue-200 px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold">
-            {inspectionId ? `ID: ${inspectionId.split('-')[0]}` : "Novo Rascunho"}
-          </Badge>
-        </div>
+        <Badge variant="outline" className="bg-blue-50/50 text-blue-700 border-blue-200 px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold w-fit">
+          {inspectionId ? `ID: ${inspectionId.split('-')[0]}` : "Novo Rascunho"}
+        </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
         {/* Sidebar: Configurações Globais */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:order-1 order-1">
           <Card className="border-slate-200 shadow-sm overflow-hidden">
             <CardHeader className="bg-slate-50/50 border-b p-4">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -143,7 +141,7 @@ export function VerificationHub({
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500">Unidade de Saúde</Label>
+                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Unidade de Saúde</Label>
                 <Select 
                   onValueChange={(val) => {
                     if (val) {
@@ -154,7 +152,7 @@ export function VerificationHub({
                   value={facilityId}
                   disabled={!!inspectionId && entries.length > 0}
                 >
-                  <SelectTrigger className="bg-white border-slate-200">
+                  <SelectTrigger className="h-12 bg-white border-slate-200">
                     <SelectValue placeholder="Selecione...">
                       {facilities.find(f => f.id === facilityId)?.name}
                     </SelectValue>
@@ -168,17 +166,17 @@ export function VerificationHub({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500">Inspetor Responsável</Label>
-                <div className="flex items-center gap-2 p-2.5 rounded-lg border bg-slate-50/50 text-sm">
+                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Inspetor Responsável</Label>
+                <div className="flex items-center gap-2 p-3 rounded-lg border bg-slate-50/50 text-sm h-12">
                   <User className="w-4 h-4 text-slate-400" />
-                  <span>Diego Martins</span>
+                  <span className="font-medium">Diego Martins</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Button 
-            className="w-full h-14 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 text-base font-bold flex items-center justify-center gap-2"
+            className="w-full h-14 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 text-lg font-bold flex items-center justify-center gap-2"
             disabled={!inspectionId || entries.length === 0 || isFinishing}
             onClick={handleFinish}
           >
@@ -192,28 +190,28 @@ export function VerificationHub({
         </div>
 
         {/* Main Feed: Itens de Inspeção */}
-        <div className="lg:col-span-3 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="lg:col-span-3 space-y-6 sm:space-y-8 lg:order-2 order-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              <Button 
                 variant="outline" 
-                className="h-28 border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 group flex flex-col gap-2 rounded-2xl transition-all"
+                className="h-24 sm:h-28 border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 group flex flex-col gap-2 rounded-2xl transition-all"
                 onClick={() => handleAddItem("staffing")}
               >
                 <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform">
-                  <Calculator className="w-6 h-6" />
+                  <Calculator className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="text-emerald-800 font-bold">Incluir Dimensionamento</div>
+                <div className="text-emerald-800 font-bold text-sm sm:text-base">Incluir Dimensionamento</div>
              </Button>
 
              <Button 
                 variant="outline" 
-                className="h-28 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 group flex flex-col gap-2 rounded-2xl transition-all"
+                className="h-24 sm:h-28 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 group flex flex-col gap-2 rounded-2xl transition-all"
                 onClick={() => handleAddItem("inspection")}
               >
                 <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
-                  <ClipboardCheck className="w-6 h-6" />
+                  <ClipboardCheck className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="text-blue-800 font-bold">Incluir Inspeção de Setor</div>
+                <div className="text-blue-800 font-bold text-sm sm:text-base">Incluir Inspeção de Setor</div>
              </Button>
           </div>
 
