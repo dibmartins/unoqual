@@ -3,20 +3,12 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { AppError } from "@/lib/errors";
-
-async function getSessionOrThrow() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) throw AppError.unauthorized("Não autenticado");
-  return session;
-}
+import { requireUserSession } from "@/lib/session";
 
 export async function getOrganization() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) return null;
+    const session = await requireUserSession();
 
     return await prisma.organization.findUnique({
       where: { id: session.user.organizationId },
@@ -34,7 +26,7 @@ export async function getOrganization() {
 
 export async function updateOrganization(id: string, data: { name: string; cnpj: string; address?: string; phone?: string }) {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
     
     // Security: Ensure user belongs to the organization they are updating
     if (session.user.organizationId !== id) {
@@ -56,8 +48,7 @@ export async function updateOrganization(id: string, data: { name: string; cnpj:
 
 export async function getUsers() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) return [];
+    const session = await requireUserSession();
     
     return await prisma.user.findMany({
       where: { organizationId: session.user.organizationId },
@@ -78,7 +69,7 @@ export async function getUsers() {
 
 export async function createUser(data: { name: string; email: string; passwordHash: string; role: "ADMIN" | "GESTOR" | "CONSULTOR" }) {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
 
     // Only ADMIN/GESTOR should create users
     if (session.user.role === "CONSULTOR") {
@@ -112,7 +103,7 @@ export async function createUser(data: { name: string; email: string; passwordHa
 
 export async function createFacility(data: { name: string; address?: string }) {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
 
     await prisma.facility.create({
       data: {
@@ -133,7 +124,7 @@ export async function createFacility(data: { name: string; address?: string }) {
 
 export async function createDepartment(data: { facilityId: string; name: string; classification?: string; hasNursing?: boolean }) {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
 
     // Verify facility belongs to organization
     const facility = await prisma.facility.findFirst({

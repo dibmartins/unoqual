@@ -17,6 +17,7 @@ import {
   getInspectionWithEntries 
 } from "@/app/actions/inspection";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface Facility {
   id: string;
@@ -83,11 +84,11 @@ export function VerificationHub({
 
   const handleAddItem = (mode: "staffing" | "inspection") => {
     if (!facilityId) {
-      alert("Selecione uma unidade para começar.");
+      toast.warning("Selecione uma unidade para começar.");
       return;
     }
     if (!inspectionId) {
-      alert("Aguarde a inicialização da inspeção. Tente novamente em alguns segundos.");
+      toast.info("Aguarde a inicialização da inspeção. Tente novamente em alguns segundos.");
       return;
     }
     setModalMode(mode);
@@ -101,7 +102,7 @@ export function VerificationHub({
     if (res.success) {
       router.push("/dashboard");
     } else {
-      alert(res.error);
+      toast.error(res.error);
       setIsFinishing(false);
     }
   };

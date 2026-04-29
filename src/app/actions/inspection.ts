@@ -4,18 +4,11 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { InspectionService, UpsertInspectionInput, UpsertEntryInput, CreateInspectionCompleteInput } from "@/services/inspection.service";
 import { ActionResponse, AppError } from "@/lib/errors";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-async function getSessionOrThrow() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) throw AppError.unauthorized("Não autenticado");
-  return session;
-}
+import { requireUserSession } from "@/lib/session";
 
 export async function createInspection(data: Omit<CreateInspectionCompleteInput, "userId" | "organizationId">): Promise<ActionResponse<{ id: string }>> {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
     const result = await InspectionService.createInspectionComplete({
       ...data,
       userId: session.user.id,
@@ -34,7 +27,7 @@ export async function createInspection(data: Omit<CreateInspectionCompleteInput,
  */
 export async function upsertInspectionAction(data: Omit<UpsertInspectionInput, "userId" | "organizationId">): Promise<ActionResponse<{ id: string }>> {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
     const inspection = await InspectionService.upsertInspection({
       ...data,
       userId: session.user.id,
@@ -52,7 +45,7 @@ export async function upsertInspectionAction(data: Omit<UpsertInspectionInput, "
  */
 export async function upsertEntryAction(data: Omit<UpsertEntryInput, "userId" | "organizationId">): Promise<ActionResponse> {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
     await InspectionService.upsertEntry({
       ...data,
       userId: session.user.id,
@@ -68,7 +61,7 @@ export async function upsertEntryAction(data: Omit<UpsertEntryInput, "userId" | 
 
 export async function deleteEntryAction(entryId: string): Promise<ActionResponse> {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
     await InspectionService.deleteEntry(entryId, session.user.id, session.user.organizationId);
     revalidatePath("/dashboard");
     return { success: true, data: null };
@@ -80,7 +73,7 @@ export async function deleteEntryAction(entryId: string): Promise<ActionResponse
 
 export async function finalizeInspectionAction(id: string): Promise<ActionResponse> {
   try {
-    const session = await getSessionOrThrow();
+    const session = await requireUserSession();
     await InspectionService.finalizeInspection(id, session.user.id, session.user.organizationId);
     revalidatePath("/dashboard");
     return { success: true, data: null };
@@ -91,8 +84,7 @@ export async function finalizeInspectionAction(id: string): Promise<ActionRespon
 }
 
 export async function getFacilities() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return [];
+  const session = await requireUserSession();
 
   return prisma.facility.findMany({
     where: { organizationId: session.user.organizationId },
@@ -105,8 +97,7 @@ export async function getFacilities() {
 
 export async function getInspectionWithEntries(id: string) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) return null;
+    const session = await requireUserSession();
     return await InspectionService.getInspectionWithEntries(id, session.user.organizationId);
   } catch (error) {
     console.error("Error fetching inspection details:", error);
@@ -115,8 +106,7 @@ export async function getInspectionWithEntries(id: string) {
 }
 
 export async function getRecentInspections() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return [];
+  const session = await requireUserSession();
 
   return prisma.inspection.findMany({
     where: { facility: { organizationId: session.user.organizationId } },

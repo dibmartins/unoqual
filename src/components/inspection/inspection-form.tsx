@@ -16,6 +16,7 @@ import { createInspection } from "@/app/actions/inspection";
 import { ComplianceStatus } from "@prisma/client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Define a type for the grouped facility data
 type FacilityWithDepts = {
@@ -155,7 +156,7 @@ export function InspectionForm({ facilities }: { facilities: FacilityWithDepts[]
     if (result.success) {
       router.push("/dashboard");
     } else {
-      alert(result.error);
+      toast.error(result.error);
     }
     setIsSubmitting(false);
   }

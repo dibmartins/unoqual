@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,13 +16,14 @@ import { Calculator, Users, Building2, Clock, AlertCircle, CheckCircle2, FileDow
 import { ComplianceStatus } from "@prisma/client";
 import { Separator } from "@/components/ui/separator";
 import { saveStaffingAction } from "@/app/actions/staffing";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import { useStaffingCalculations } from "@/hooks/useStaffingCalculations";
+import { generateStaffingPDF } from "@/services/pdf/staffing-pdf.service";
+import { toast } from "sonner";
 
 const staffingSchema = z.object({
   facilityId: z.string().min(1, "Selecione uma unidade"),
   departmentId: z.string().min(1, "Selecione um setor"),
-  weeklyHours: z.enum(["20", "30", "36", "40"]),
+  weeklyHours: z.enum(["20", "30", "36", "40", "44"]),
 
   // Censo de Pacientes
   pcm: z.coerce.number().min(0), // Cuidado Mínimo
@@ -38,13 +39,6 @@ const staffingSchema = z.object({
 
 type StaffingFormValues = z.infer<typeof staffingSchema>;
 
-const KM_MAP = {
-  "20": 0.4235,
-  "30": 0.2823,
-  "36": 0.2353,
-  "40": 0.2118,
-};
-
 interface Facility {
   id: string;
   name: string;
@@ -56,6 +50,7 @@ interface Facility {
 
 export function StaffingForm({ facilities }: { facilities: Facility[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
   const form = useForm<StaffingFormValues>({
     /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
     // @ts-ignore: zod resolver version mismatch between libraries
@@ -76,26 +71,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
 
   const watchAll = form.watch();
 
-  // Cálculos em tempo real
-  const calculations = useMemo(() => {
-    const { pcm = 0, pci = 0, pcad = 0, pcsi = 0, pcit = 0, weeklyHours = "36" } = watchAll;
-
-    // THE = [(PCM*4)+(PCI*6)+(PCAD*10)+(PCSI*10)+(PCIt*18)]
-    const the = (pcm * 4) + (pci * 6) + (pcad * 10) + (pcsi * 10) + (pcit * 18);
-
-    const km = KM_MAP[weeklyHours as keyof typeof KM_MAP] || 0.2353;
-    const qp = Math.ceil(the * km);
-
-    // Proporcionalidade
-    const nurseRatio = (pcit > 0 || pcsi > 0) ? 0.52 : 0.33;
-    const requiredNurses = Math.ceil(qp * nurseRatio);
-    const requiredTechs = qp - requiredNurses;
-
-    return { the, qp, requiredNurses, requiredTechs };
-  }, [watchAll]);
-
-  const nurseGap = (watchAll.currentNurses || 0) - calculations.requiredNurses;
-  const techGap = (watchAll.currentTechs || 0) - calculations.requiredTechs;
+  const calculations = useStaffingCalculations(watchAll as any);
 
   const selectedFacility = facilities.find(f => f.id === watchAll.facilityId);
 
@@ -104,104 +80,55 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
     try {
       const result = await saveStaffingAction({
         ...data,
-        calculations
+        calculations: {
+          the: calculations.the,
+          qp: calculations.qp,
+          requiredNurses: calculations.requiredNurses,
+          requiredTechs: calculations.requiredTechs
+        }
       });
 
       if (result.success) {
-        alert("Dimensionamento salvo com sucesso!");
+        setHasSaved(true);
+        toast.success("Dimensionamento salvo com sucesso!");
       } else {
-        alert("Erro ao salvar: " + result.error);
+        toast.error("Erro ao salvar: " + result.error);
       }
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar o dimensionamento.");
+      toast.error("Erro ao salvar o dimensionamento.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleExportPDF = () => {
-    const doc = new jsPDF();
-    const timestamp = new Date().toLocaleDateString("pt-BR");
-
-    // Header
-    doc.setFontSize(22);
-    doc.setTextColor(5, 150, 105); // emerald-600
-    doc.text("Relatório de Dimensionamento de Enfermagem", 14, 22);
-
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(`Data de Emissão: ${timestamp}`, 14, 30);
-    doc.text("Baseado na Resolução COFEN 543/2017", 14, 35);
-
-    // Localização Info
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text("Informações da Unidade", 14, 48);
-
-    autoTable(doc, {
-      startY: 52,
-      head: [['Unidade', 'Setor', 'Jornada Semanal']],
-      body: [[
-        selectedFacility?.name || "N/A",
-        selectedFacility?.departments.find(d => d.id === watchAll.departmentId)?.name || "N/A",
-        `${watchAll.weeklyHours}h`
-      ]],
-      theme: 'grid',
-      headStyles: { fillColor: [5, 150, 105] }
+    generateStaffingPDF({
+      facilityName: selectedFacility?.name || "N/A",
+      departmentName: selectedFacility?.departments.find(d => d.id === watchAll.departmentId)?.name || "N/A",
+      weeklyHours: watchAll.weeklyHours,
+      census: {
+        pcm: watchAll.pcm,
+        pci: watchAll.pci,
+        pcad: watchAll.pcad,
+        pcsi: watchAll.pcsi,
+        pcit: watchAll.pcit
+      },
+      calculations: {
+        the: calculations.the,
+        qp: calculations.qp,
+        requiredNurses: calculations.requiredNurses,
+        requiredTechs: calculations.requiredTechs
+      },
+      currentStaff: {
+        nurses: watchAll.currentNurses || 0,
+        techs: watchAll.currentTechs || 0
+      },
+      gaps: {
+        nurseGap: calculations.nurseGap,
+        techGap: calculations.techGap
+      }
     });
-
-    // Censo de Pacientes
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    doc.text("Censo Assistencial (Média Diária)", 14, (doc as any).lastAutoTable.finalY + 15);
-    autoTable(doc, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      startY: (doc as any).lastAutoTable.finalY + 20,
-      head: [['PCM', 'PCI', 'PCAD', 'PCSI', 'PCIt']],
-      body: [[
-        watchAll.pcm,
-        watchAll.pci,
-        watchAll.pcad,
-        watchAll.pcsi,
-        watchAll.pcit
-      ]],
-      theme: 'striped',
-      headStyles: { fillColor: [71, 85, 105] } // slate-600
-    });
-
-    // Resultados
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    doc.text("Quadro de Pessoal Necessário", 14, (doc as any).lastAutoTable.finalY + 15);
-    autoTable(doc, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      startY: (doc as any).lastAutoTable.finalY + 20,
-      head: [['Métrica', 'Cálculo']],
-      body: [
-        ['Total de Horas de Enfermagem (THE)', `${calculations.the}h`],
-        ['Quadro de Pessoal (QP Total)', calculations.qp],
-        ['Enfermeiros Necessários', calculations.requiredNurses],
-        ['Técnicos/Auxiliares Necessários', calculations.requiredTechs]
-      ],
-      theme: 'grid',
-      headStyles: { fillColor: [5, 150, 105] }
-    });
-
-    // Gap Analysis
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    doc.text("Análise de Gap (Déficit/Superávit)", 14, (doc as any).lastAutoTable.finalY + 15);
-    autoTable(doc, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      startY: (doc as any).lastAutoTable.finalY + 20,
-      head: [['Categoria', 'Atual', 'Necessário', 'Gap']],
-      body: [
-        ['Enfermeiros', watchAll.currentNurses, calculations.requiredNurses, nurseGap >= 0 ? `+${nurseGap} (OK)` : `${nurseGap} (DÉFICIT)`],
-        ['Técnicos', watchAll.currentTechs, calculations.requiredTechs, techGap >= 0 ? `+${techGap} (OK)` : `${techGap} (DÉFICIT)`]
-      ],
-      theme: 'striped',
-      headStyles: { fillColor: nurseGap < 0 || techGap < 0 ? [220, 38, 38] : [5, 150, 105] }
-    });
-
-    doc.save(`dimensionamento-${selectedFacility?.name || 'relatorio'}.pdf`);
   };
 
   return (
@@ -292,6 +219,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                           <SelectItem value="30">30 horas</SelectItem>
                           <SelectItem value="36">36 horas</SelectItem>
                           <SelectItem value="40">40 horas</SelectItem>
+                          <SelectItem value="44">44 horas</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -306,7 +234,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                   <Users className="w-5 h-5 text-slate-400" />
                   Censo de Pacientes (Média Diária)
                 </CardTitle>
-                <CardDescription>Quantidade de pacientes por nível de complexidade assistencial.</CardDescription>
+                <CardDescription>Informe a quantidade de pacientes para cada nível de complexidade assistencial.</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-4">
                 <div className="space-y-2">
@@ -357,6 +285,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                             <SelectItem value="30">30 horas</SelectItem>
                             <SelectItem value="36">36 horas</SelectItem>
                             <SelectItem value="40">40 horas</SelectItem>
+                            <SelectItem value="44">44 horas</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
@@ -413,26 +342,26 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Enfermeiros:</span>
-                    {nurseGap >= 0 ? (
+                    {calculations.nurseGap >= 0 ? (
                       <Badge className="bg-green-100 text-green-700 border-green-200">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> OK (+{nurseGap})
+                        <CheckCircle2 className="w-3 h-3 mr-1" /> OK (+{calculations.nurseGap})
                       </Badge>
                     ) : (
                       <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 animate-pulse">
-                        <AlertCircle className="w-3 h-3 mr-1" /> Falta {Math.abs(nurseGap)}
+                        <AlertCircle className="w-3 h-3 mr-1" /> Falta {Math.abs(calculations.nurseGap)}
                       </Badge>
                     )}
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Técnicos:</span>
-                    {techGap >= 0 ? (
+                    {calculations.techGap >= 0 ? (
                       <Badge className="bg-green-100 text-green-700 border-green-200">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> OK (+{techGap})
+                        <CheckCircle2 className="w-3 h-3 mr-1" /> OK (+{calculations.techGap})
                       </Badge>
                     ) : (
                       <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 animate-pulse">
-                        <AlertCircle className="w-3 h-3 mr-1" /> Falta {Math.abs(techGap)}
+                        <AlertCircle className="w-3 h-3 mr-1" /> Falta {Math.abs(calculations.techGap)}
                       </Badge>
                     )}
                   </div>
@@ -459,6 +388,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                     variant="outline"
                     className="w-full py-6 text-lg font-bold border-slate-200 hover:bg-slate-50"
                     onClick={handleExportPDF}
+                    disabled={!hasSaved}
                   >
                     <FileDown className="w-5 h-5 mr-2" />
                     Gerar Relatório PDF

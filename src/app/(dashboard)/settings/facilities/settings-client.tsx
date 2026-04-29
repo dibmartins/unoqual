@@ -9,6 +9,7 @@ import { Plus, Building2, MapPin, Trash2, Layers } from "lucide-react";
 import { createFacility, createDepartment } from "@/app/actions/settings";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -127,7 +128,7 @@ export function SettingsClient({ initialFacilities }: { initialFacilities: Facil
       setNewFacilityAddress("");
       router.refresh();
     } else {
-      alert(res.error);
+      toast.error(res.error);
     }
     setIsSubmitting(false);
   };
@@ -135,7 +136,7 @@ export function SettingsClient({ initialFacilities }: { initialFacilities: Facil
   const handleCreateDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDepartmentName || !selectedFacilityId || !newDepartmentClassification) {
-      alert("Por favor, preencha o nome e o tipo do setor.");
+      toast.warning("Por favor, preencha o nome e o tipo do setor.");
       return;
     }
 
@@ -153,7 +154,7 @@ export function SettingsClient({ initialFacilities }: { initialFacilities: Facil
       setNewDepartmentHasNursing(true);
       router.refresh();
     } else {
-      alert(res.error);
+      toast.error(res.error);
     }
     setIsSubmitting(false);
   };

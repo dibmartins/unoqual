@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { upsertEntryAction } from "@/app/actions/inspection";
 import { ComplianceStatus } from "@prisma/client";
+import { toast } from "sonner";
 
 // Form Components (To be implemented)
 import { DimensionamentoForm } from "./dimensionamento-form";
@@ -86,16 +87,16 @@ export function FormManagerModal({
 
   const handleNext = () => {
     if (isFormTypeDimensionamento && !occupation) {
-      alert("Selecione uma ocupação.");
+      toast.warning("Selecione uma ocupação.");
       return;
     }
     if (!isFormTypeDimensionamento && (!departmentId || !inspectionType)) {
-      alert("Selecione o setor e o tipo de inspeção.");
+      toast.warning("Selecione o setor e o tipo de inspeção.");
       return;
     }
     
     if (checkDuplicate()) {
-      alert("Este item já foi adicionado a esta inspeção.");
+      toast.warning("Este item já foi adicionado a esta inspeção.");
       return;
     }
     
@@ -118,11 +119,11 @@ export function FormManagerModal({
       if (res.success) {
         onSuccess();
       } else {
-        alert(res.error);
+        toast.error(res.error);
       }
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar o formulário.");
+      toast.error("Erro ao salvar o formulário.");
     } finally {
       setIsSubmitting(false);
     }

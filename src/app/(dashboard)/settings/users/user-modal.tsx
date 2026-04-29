@@ -22,6 +22,7 @@ import {
 import { createUser } from "@/app/actions/settings";
 import { useRouter } from "next/navigation";
 import { UserPlus, Shield, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export function UserModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter();
@@ -49,9 +50,9 @@ export function UserModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
       setFormData({ name: "", email: "", password: "", role: "CONSULTOR" });
       onClose();
       router.refresh();
-      alert("Usuário criado com sucesso!");
+      toast.success("Usuário criado com sucesso!");
     } else {
-      alert(res.error);
+      toast.error(res.error);
     }
     setIsSubmitting(false);
   };

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, Save } from "lucide-react";
 import { updateOrganization } from "@/app/actions/settings";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type Organization = {
   id: string;
@@ -37,9 +38,9 @@ export function OrganizationForm({ organization }: { organization: Organization 
     const res = await updateOrganization(organization.id, formData);
     if (res.success) {
       router.refresh();
-      alert("Dados atualizados com sucesso!");
+      toast.success("Dados atualizados com sucesso!");
     } else {
-      alert(res.error);
+      toast.error(res.error);
     }
     setIsSubmitting(false);
   };

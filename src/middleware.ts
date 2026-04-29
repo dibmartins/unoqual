@@ -4,6 +4,12 @@ export default withAuth({
   pages: {
     signIn: "/login",
   },
+  callbacks: {
+    authorized: ({ token }) => {
+      // Retorna true somente se o token existir e possuir organizationId
+      return !!token?.organizationId;
+    },
+  },
 });
 
 export const config = {
