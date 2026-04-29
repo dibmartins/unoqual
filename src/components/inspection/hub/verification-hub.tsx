@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ItemCard } from "./item-card";
 import { FormManagerModal } from "../modals/form-manager-modal";
+import { StaffingForm } from "@/components/staffing/staffing-form";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { 
   upsertInspectionAction, 
   deleteEntryAction, 
@@ -36,7 +38,11 @@ export function VerificationHub({
   const [inspectionId, setInspectionId] = useState<string | null>(initialInspectionId || null);
   const [facilityId, setFacilityId] = useState<string>("");
   const [entries, setEntries] = useState<any[]>([]);
+  const [staffingCalculations, setStaffingCalculations] = useState<any[]>([]);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
+  const [calculationModalOpen, setCalculationModalOpen] = useState(false);
+  const [selectedCalculationEntry, setSelectedCalculationEntry] = useState<any>(null);
   const [modalMode, setModalMode] = useState<"staffing" | "inspection" | null>(null);
   const [editingEntry, setEditingEntry] = useState<any | null>(null);
 
@@ -50,6 +56,7 @@ export function VerificationHub({
         if (res) {
           setFacilityId(res.facilityId);
           setEntries(res.entries);
+          setStaffingCalculations((res as any).staffingCalculations || []);
         }
       }
     }
@@ -74,6 +81,7 @@ export function VerificationHub({
       const res = await getInspectionWithEntries(inspectionId);
       if (res) {
         setEntries(res.entries);
+        setStaffingCalculations((res as any).staffingCalculations || []);
       }
     }
   }
@@ -95,12 +103,17 @@ export function VerificationHub({
     setEditingEntry(null);
   };
 
+  const handleCalculateItem = (entry: any) => {
+    setSelectedCalculationEntry(entry);
+    setCalculationModalOpen(true);
+  };
+
   const handleFinish = async () => {
     if (!inspectionId) return;
     setIsFinishing(true);
     const res = await finalizeInspectionAction(inspectionId);
     if (res.success) {
-      router.push("/dashboard");
+      router.push("/inspections");
     } else {
       toast.error(res.error);
       setIsFinishing(false);
@@ -116,7 +129,6 @@ export function VerificationHub({
 
   return (
     <div className="max-w-4xl mx-auto py-6 sm:py-10 px-4 space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-3 text-slate-900">
@@ -133,7 +145,6 @@ export function VerificationHub({
         </Badge>
       </div>
 
-      {/* Configurações Globais */}
       <Card className="border-slate-200 shadow-sm overflow-hidden">
         <CardContent className="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white">
           <div className="space-y-2">
@@ -160,7 +171,7 @@ export function VerificationHub({
               </SelectContent>
             </Select>
             {!!inspectionId && entries.length > 0 && (
-              <p className="text-[10px] text-amber-600 font-medium">Não é possível alterar a unidade apó adicionarmos itens.</p>
+              <p className="text-[10px] text-amber-600 font-medium">Não é possível alterar a unidade após adicionarmos itens.</p>
             )}
           </div>
 
@@ -176,7 +187,6 @@ export function VerificationHub({
         </CardContent>
       </Card>
 
-      {/* Botões de Ação Principais */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
          <Button 
             variant="outline" 
@@ -201,7 +211,6 @@ export function VerificationHub({
          </Button>
       </div>
 
-      {/* Lista de Itens */}
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-100">
           <h2 className="text-xl font-bold text-slate-800">
@@ -224,26 +233,26 @@ export function VerificationHub({
           </div>
         ) : (
           <div className="space-y-4">
-            {entries.map((entry) => (
-              <ItemCard
-                key={entry.id}
-                type={entry.type}
-                checklistItemKey={entry.checklistItemKey}
-                complianceStatus={entry.complianceStatus}
-                departmentName={entry.department?.name}
-                metadata={entry.metadata}
-                onEdit={() => {
-                  setEditingEntry(entry);
-                  setModalMode(entry.type === "staffing" ? "staffing" : "inspection");
-                }}
-                onDelete={() => handleDelete(entry.id)}
-              />
-            ))}
+            {entries.map((entry) => {
+              const hasCalc = staffingCalculations.some(calc => calc.departmentId === entry.departmentId);
+              return (
+                <ItemCard
+                  key={entry.id}
+                  entry={entry}
+                  hasCalculation={hasCalc}
+                  onEdit={() => {
+                    setEditingEntry(entry);
+                    setModalMode(entry.type === "staffing" ? "staffing" : "inspection");
+                  }}
+                  onDelete={() => handleDelete(entry.id)}
+                  onCalculate={() => handleCalculateItem(entry)}
+                />
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* CTA Inferior */}
       <div className="pt-6 mt-4 flex justify-end">
         <Button 
           className="w-full sm:w-auto h-14 px-8 bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 text-lg font-bold flex items-center justify-center gap-3 rounded-xl transition-all disabled:opacity-50 disabled:shadow-none"
@@ -274,6 +283,25 @@ export function VerificationHub({
           existingEntries={entries}
         />
       )}
+
+      <Dialog open={calculationModalOpen} onOpenChange={setCalculationModalOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-slate-50 p-6 border-slate-200 shadow-xl">
+          {selectedCalculationEntry && (
+            <StaffingForm
+              facilities={[selectedFacility!]}
+              inspectionId={inspectionId!}
+              initialFacilityId={facilityId}
+              initialDepartmentId={selectedCalculationEntry.departmentId}
+              initialData={selectedCalculationEntry.metadata?.calculationInputs}
+              onSuccess={() => {
+                setCalculationModalOpen(false);
+                refreshData();
+              }}
+              onCancel={() => setCalculationModalOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

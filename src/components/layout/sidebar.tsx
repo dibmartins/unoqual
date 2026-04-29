@@ -13,8 +13,7 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/dashboard", label: "Painel Geral", icon: LayoutDashboard },
-  { href: "/inspection/new", label: "Nova Inspeção", icon: ClipboardCheck },
-  { href: "/staffing/new", label: "Dimensionamento", icon: Calculator },
+  { href: "/inspections", label: "Inspeções", icon: ClipboardCheck },
   { href: "/settings", label: "Configurações", icon: Settings },
 ];
 

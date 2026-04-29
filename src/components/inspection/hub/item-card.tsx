@@ -3,34 +3,32 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit3, ClipboardCheck, Calculator, Building2 } from "lucide-react";
+import { Trash2, Edit3, ClipboardCheck, Calculator, Building2, Sigma, CheckCircle2 } from "lucide-react";
 import { ComplianceStatus } from "@prisma/client";
 
 interface ItemCardProps {
-  type: string;
-  checklistItemKey: string;
-  complianceStatus: ComplianceStatus;
-  departmentName?: string;
-  metadata?: any;
-  onEdit?: () => void;
-  onDelete?: () => void;
+  entry: any;
+  hasCalculation?: boolean;
+  onEdit: (entry: any) => void;
+  onDelete: (id: string) => void;
+  onCalculate?: (entry: any) => void;
   readOnly?: boolean;
 }
 
 export function ItemCard({ 
-  type, 
-  checklistItemKey, 
-  complianceStatus, 
-  departmentName, 
-  metadata,
+  entry, 
+  hasCalculation,
   onEdit, 
   onDelete,
+  onCalculate,
   readOnly = false
-}: ItemCardProps) {  const isStaffing = type === "staffing";
+}: ItemCardProps) {
+  const { type, checklistItemKey, complianceStatus, departmentName, metadata } = entry;
+  const isStaffing = type === "staffing";
   const Icon = isStaffing ? Calculator : ClipboardCheck;
 
   return (
-    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
@@ -54,9 +52,16 @@ export function ItemCard({
               </div>
               
               <div className="flex items-center gap-4 text-sm text-slate-500">
-                <div className="flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5" />
-                  {departmentName || "Unidade (Geral)"}
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="bg-white/50 text-slate-600 border-slate-200 shadow-sm">
+                    <Building2 className="w-3 h-3 mr-1 opacity-50" />
+                    {departmentName || "Setor Geral"}
+                  </Badge>
+                  {isStaffing && hasCalculation && (
+                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                      <CheckCircle2 className="w-3 h-3 mr-1" /> Cálculo Realizado
+                    </Badge>
+                  )}
                 </div>
                 
                 {isStaffing && metadata?.qp && (
@@ -81,11 +86,16 @@ export function ItemCard({
           </div>
 
           {!readOnly && (
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-blue-600" onClick={onEdit}>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              {isStaffing && onCalculate && (
+                <Button variant="ghost" size="icon" onClick={() => onCalculate(entry)} className="h-8 w-8 text-slate-500 hover:text-emerald-600" title="Calcular Quadro">
+                  <Calculator className="w-4 h-4" />
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" onClick={() => onEdit(entry)} className="h-8 w-8 text-slate-500 hover:text-indigo-600" title="Editar Metadados">
                 <Edit3 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600" onClick={onDelete}>
+              <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)} className="h-8 w-8 text-slate-500 hover:text-red-600" title="Excluir">
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>

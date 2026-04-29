@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { AppError } from "@/lib/errors";
 
 export interface StaffingSaveData {
+  inspectionId?: string;
   facilityId: string;
   departmentId: string;
   weeklyHours: string;
@@ -57,16 +58,28 @@ export class StaffingService {
       if (!facility) throw AppError.notFound("Unidade não encontrada nesta organização.");
 
       return await prisma.$transaction(async (tx) => {
-        // 1. Criar a Inspeção (Placeholder para Auditoria de Dimensionamento)
-        const inspection = await tx.inspection.create({
-          data: {
-            facilityId: data.facilityId,
-            inspectorId: data.userId, // Use actual userId instead of generic placeholder
-            status: "completed",
-            completedAt: new Date(),
-            createdById: data.userId,
-          },
-        });
+        let inspectionId = data.inspectionId;
+        if (!inspectionId) {
+          const inspection = await tx.inspection.create({
+            data: {
+              facilityId: data.facilityId,
+              inspectorId: data.userId,
+              status: "completed",
+              completedAt: new Date(),
+              createdById: data.userId,
+            },
+          });
+          inspectionId = inspection.id;
+        }
+
+        if (data.inspectionId) {
+          await tx.staffingCalculation.deleteMany({
+            where: {
+              inspectionId: data.inspectionId,
+              departmentId: data.departmentId,
+            }
+          });
+        }
 
         // 2. Salvar os cálculos para Enfermeiros e Técnicos
         const nurseGap = data.currentNurses - data.calculations.requiredNurses;
@@ -75,7 +88,7 @@ export class StaffingService {
         await tx.staffingCalculation.createMany({
           data: [
             {
-              inspectionId: inspection.id,
+              inspectionId: inspectionId,
               departmentId: data.departmentId,
               professionalClass: "Nurse",
               totalNursingHours: data.calculations.the,
@@ -85,7 +98,7 @@ export class StaffingService {
               createdById: data.userId,
             },
             {
-              inspectionId: inspection.id,
+              inspectionId: inspectionId,
               departmentId: data.departmentId,
               professionalClass: "Technician",
               totalNursingHours: data.calculations.the,
@@ -97,15 +110,49 @@ export class StaffingService {
           ],
         });
 
+        if (data.inspectionId) {
+          // Salvar os inputs na metadata do InspectionEntry correspondente
+          const entry = await tx.inspectionEntry.findFirst({
+            where: {
+              inspectionId: data.inspectionId,
+              departmentId: data.departmentId,
+              type: "staffing",
+              checklistItemKey: "Enfermagem"
+            }
+          });
+
+          if (entry) {
+            const currentMetadata = entry.metadata ? (typeof entry.metadata === 'object' ? entry.metadata : JSON.parse(entry.metadata as string)) : {};
+            await tx.inspectionEntry.update({
+              where: { id: entry.id },
+              data: {
+                metadata: {
+                  ...currentMetadata,
+                  calculationInputs: {
+                    weeklyHours: data.weeklyHours,
+                    pcm: data.pcm,
+                    pci: data.pci,
+                    pcad: data.pcad,
+                    pcsi: data.pcsi,
+                    pcit: data.pcit,
+                    currentNurses: data.currentNurses,
+                    currentTechs: data.currentTechs
+                  }
+                }
+              }
+            });
+          }
+        }
+
         await this.logAudit({
           userId: data.userId,
           action: "SAVE_STAFFING_CALCULATION",
           entityType: "Inspection",
-          entityId: inspection.id,
+          entityId: inspectionId,
           newValues: { departmentId: data.departmentId, calculations: data.calculations }
         });
 
-        return inspection;
+        return { id: inspectionId };
       });
     } catch (error) {
       console.error("Error in saveStaffing service:", error);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -48,7 +48,25 @@ interface Facility {
   }>;
 }
 
-export function StaffingForm({ facilities }: { facilities: Facility[] }) {
+interface StaffingFormProps {
+  facilities: Facility[];
+  inspectionId?: string;
+  initialFacilityId?: string;
+  initialDepartmentId?: string;
+  initialData?: any;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+export function StaffingForm({ 
+  facilities, 
+  inspectionId, 
+  initialFacilityId, 
+  initialDepartmentId, 
+  initialData, 
+  onSuccess, 
+  onCancel 
+}: StaffingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
   const form = useForm<StaffingFormValues>({
@@ -56,18 +74,33 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
     // @ts-ignore: zod resolver version mismatch between libraries
     resolver: zodResolver(staffingSchema),
     defaultValues: {
-      facilityId: "",
-      departmentId: "",
-      weeklyHours: "36",
-      pcm: 0,
-      pci: 0,
-      pcad: 0,
-      pcsi: 0,
-      pcit: 0,
-      currentNurses: 0,
-      currentTechs: 0,
+      facilityId: initialFacilityId || "",
+      departmentId: initialDepartmentId || "",
+      weeklyHours: initialData?.weeklyHours || "36",
+      pcm: initialData?.pcm || 0,
+      pci: initialData?.pci || 0,
+      pcad: initialData?.pcad || 0,
+      pcsi: initialData?.pcsi || 0,
+      pcit: initialData?.pcit || 0,
+      currentNurses: initialData?.currentNurses || 0,
+      currentTechs: initialData?.currentTechs || 0,
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      facilityId: initialFacilityId || "",
+      departmentId: initialDepartmentId || "",
+      weeklyHours: initialData?.weeklyHours || "36",
+      pcm: initialData?.pcm || 0,
+      pci: initialData?.pci || 0,
+      pcad: initialData?.pcad || 0,
+      pcsi: initialData?.pcsi || 0,
+      pcit: initialData?.pcit || 0,
+      currentNurses: initialData?.currentNurses || 0,
+      currentTechs: initialData?.currentTechs || 0,
+    });
+  }, [initialData, initialFacilityId, initialDepartmentId, form]);
 
   const watchAll = form.watch();
 
@@ -80,6 +113,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
     try {
       const result = await saveStaffingAction({
         ...data,
+        inspectionId,
         calculations: {
           the: calculations.the,
           qp: calculations.qp,
@@ -91,6 +125,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
       if (result.success) {
         setHasSaved(true);
         toast.success("Dimensionamento salvo com sucesso!");
+        onSuccess?.();
       } else {
         toast.error("Erro ao salvar: " + result.error);
       }
@@ -132,7 +167,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4">
+    <div className="w-full mx-auto py-2 px-1">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -162,7 +197,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                     name="facilityId"
                     control={form.control}
                     render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!!initialFacilityId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione">
                             {facilities.find(f => f.id === field.value)?.name}
@@ -187,7 +222,7 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        disabled={!selectedFacility}
+                        disabled={!!initialDepartmentId || !selectedFacility}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione">
@@ -382,6 +417,18 @@ export function StaffingForm({ facilities }: { facilities: Facility[] }) {
                       </>
                     )}
                   </Button>
+
+                  {onCancel && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full text-slate-500 hover:text-slate-700"
+                      onClick={onCancel}
+                      disabled={isSubmitting}
+                    >
+                      Cancelar
+                    </Button>
+                  )}
 
                   <Button
                     type="button"

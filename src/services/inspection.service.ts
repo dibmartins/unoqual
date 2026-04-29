@@ -308,7 +308,8 @@ export class InspectionService {
         },
         facility: {
           include: { departments: true }
-        }
+        },
+        staffingCalculations: true
       }
     });
 
