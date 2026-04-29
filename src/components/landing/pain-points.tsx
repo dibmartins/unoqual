@@ -7,21 +7,21 @@ const pains = [
   {
     icon: Clock,
     title: "Dias perdidos em planilhas",
-    description: "Cruzamento manual de dados de staffing com as resoluções do Cofen consome horas preciosas do RT.",
+    description: "Cruzamento manual de dados de pessoal com as resoluções do Cofen consome horas e até mesmo dias.",
     color: "text-amber-500",
     bg: "bg-amber-500/10"
   },
   {
     icon: FileWarning,
-    title: "Risco Jurídico e Sanitário",
-    description: "Formulários de papel perdidos, ilegíveis ou incompletos são um perigo em fiscalizações.",
+    title: "Risco Jurídico",
+    description: "Formulários de papel perdidos, ilegíveis ou incompletos podem gerar autuações em caso de fiscalização.",
     color: "text-red-500",
     bg: "bg-red-500/10"
   },
   {
     icon: TrendingDown,
     title: "Falta de Visibilidade",
-    description: "Impossibilidade de identificar gargalos estruturais e de processos em tempo real nas unidades.",
+    description: "Identificar gargalos estruturais e de processos em tempo real nas unidades.",
     color: "text-blue-500",
     bg: "bg-blue-500/10"
   }
@@ -41,12 +41,12 @@ export function PainPoints() {
             <AlertCircle className="w-3.5 h-3.5" />
             O CUSTO DA INEFICIÊNCIA
           </motion.div>
-          
+
           <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight">
-            Você sabe quanto custa o tempo do seu <span className="text-blue-500">Technical Lead (RT)</span>?
+            Você sabe quanto custa o tempo do seu <span className="text-blue-500">Enfermeiro RT</span>?
           </h2>
           <p className="text-slate-400 text-lg">
-            A gestão em saúde não pode mais depender de processos analógicos e decisões baseadas em suposições.
+            A gestão em saúde não pode depender de processos manuais nem suposições.
           </p>
         </div>
 

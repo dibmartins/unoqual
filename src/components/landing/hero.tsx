@@ -10,10 +10,10 @@ export function Hero() {
     <section className="relative pt-20 pb-16 md:pt-32 md:pb-32 overflow-hidden bg-[#FBFBFA]">
       {/* Elementos Decorativos */}
       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-      
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -23,21 +23,15 @@ export function Hero() {
               <ShieldCheck className="w-3.5 h-3.5" />
               CONFORMIDADE NORMATIVA DIGITAL
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-6">
-              Automatize as Auditorias de Enfermagem da sua Unidade.
+              O assistente que Enfermeiro RT sempre desejou.
             </h1>
-            
-            <p className="text-xl text-slate-600 font-medium mb-4 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              De <span className="text-slate-900 font-bold">35 horas</span> para relatórios <span className="text-blue-600 font-bold italic">instantâneos</span>.
-            </p>
-            
+
             <p className="text-lg text-slate-500 mb-10 max-w-xl mx-auto lg:mx-0">
-              Garanta 100% de conformidade com as resoluções do Cofen e Anvisa. A plataforma definitiva para o 
-              <span className="text-slate-900 font-semibold italic"> Nursing Director</span> gerenciar o 
-              <span className="text-slate-900 font-semibold"> Staffing</span> e as inspeções sem retrabalho.
+              Garanta 100% de conformidade com as resoluções do Cofen e Anvisa.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <Link href="/onboarding">
                 <Button size="lg" className="h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-xl shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 group">
@@ -48,17 +42,13 @@ export function Hero() {
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  Sem cartão de crédito
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  Setup em 5 minutos
+                  Leva menos de 5 minutos para configurar e usar
                 </div>
               </div>
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -103,13 +93,13 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Overlay de Reflexo */}
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
             </div>
 
             {/* Badge Flutuante */}
-            <motion.div 
+            <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
               className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 hidden sm:block"
@@ -119,8 +109,8 @@ export function Hero() {
                   <CheckCircle2 className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">RELATÓRIO</p>
-                  <p className="text-sm font-black text-slate-900">Gerado com Sucesso</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Unidade de Saúde</p>
+                  <p className="text-sm font-black text-slate-900">Inspeções geradas com sucesso</p>
                 </div>
               </div>
             </motion.div>

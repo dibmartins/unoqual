@@ -7,13 +7,13 @@ const steps = [
   {
     icon: Database,
     title: "Mapeamento",
-    description: "Cadastre os dados base da sua Facility (Unidade de Saúde), setores e perfis de pacientes.",
+    description: "Cadastre os dados base da sua Unidade de Saúde, setores e equipe.",
     color: "bg-blue-500"
   },
   {
     icon: ClipboardCheck,
     title: "Inspeção Guiada",
-    description: "O RT usa checklists inteligentes e captura fotos criptografadas direto do dispositivo móvel.",
+    description: "O RT usa checklists inteligentes e captura fotos direto do celular ou tablet.",
     color: "bg-blue-600"
   },
   {
@@ -30,7 +30,7 @@ export function HowItWorks() {
       <div className="container mx-auto px-6">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6">
-            O Fluxo <span className="text-blue-600">Digitalizado</span>
+            Agora tudo <span className="text-blue-600">é Digitalizado</span>
           </h2>
           <p className="text-slate-500 text-lg max-w-2xl mx-auto">
             Uma jornada pensada para a realidade da assistência, sem fricção e com máxima rastreabilidade.
@@ -38,9 +38,6 @@ export function HowItWorks() {
         </div>
 
         <div className="relative">
-          {/* Linha Conectora (Desktop) */}
-          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -translate-y-1/2 hidden lg:block" />
-          
           <div className="grid lg:grid-cols-3 gap-12 relative z-10">
             {steps.map((step, index) => (
               <motion.div
@@ -64,6 +61,7 @@ export function HowItWorks() {
               </motion.div>
             ))}
           </div>
+
         </div>
       </div>
     </section>

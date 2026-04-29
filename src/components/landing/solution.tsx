@@ -17,17 +17,17 @@ export function Solution() {
               <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 leading-tight">
                 A engenharia por trás da <span className="text-blue-600">conformidade</span>.
               </h2>
-              
+
               <div className="space-y-10">
                 <div className="flex gap-6">
                   <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
                     <FileText className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Instant Reporting</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Laudos gerados instantaneamente</h3>
                     <p className="text-slate-600 leading-relaxed">
-                      O RT finaliza a inspeção no <span className="font-semibold italic">Ward</span> (Setor de Internação) 
-                      e o laudo em PDF já está no seu e-mail, padronizado e pronto para auditoria.
+                      Assim que o RT finaliza a inspeção no <span className="font-semibold italic">pronto-socorro</span>
+                      e o laudo em PDF já está no seu e-mail, padronizado e pronto para conferência.
                     </p>
                   </div>
                 </div>
@@ -37,10 +37,10 @@ export function Solution() {
                     <Cpu className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Compliance Nativo</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Compliance</h3>
                     <p className="text-slate-600 leading-relaxed">
-                      Algoritmos de <span className="font-semibold">Staffing</span> (Dimensionamento de Pessoal) 
-                      atualizados em tempo real com a legislação vigente (Cofen/Anvisa).
+                      Algoritmos de <span className="font-semibold">Dimensionamento de Pessoal </span>
+                      que seguem rigorosamente a legislação vigente.
                     </p>
                   </div>
                 </div>
@@ -62,7 +62,7 @@ export function Solution() {
                     <div className="w-2.5 h-2.5 rounded-full bg-slate-700" />
                     <div className="w-2.5 h-2.5 rounded-full bg-slate-700" />
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono">LAUDO_INSPECAO_V2.PDF</div>
+                  <div className="text-[10px] text-slate-400 font-mono">LAUDO_INSPECAO.PDF</div>
                   <div className="w-4" />
                 </div>
                 <div className="p-8">
@@ -93,7 +93,7 @@ export function Solution() {
                 </div>
               </div>
             </motion.div>
-            
+
             {/* Elementos Decorativos de Fundo */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50 rounded-full blur-3xl -z-10" />
           </div>
