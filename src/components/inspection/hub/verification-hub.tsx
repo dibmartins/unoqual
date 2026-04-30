@@ -1,25 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, ClipboardCheck, Calculator, Save, Building2, User, AlertCircle } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Plus, ClipboardCheck, Calculator, Save, Building2, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ItemCard } from "./item-card";
 import { FormManagerModal } from "../modals/form-manager-modal";
 import { StaffingForm } from "@/components/staffing/staffing-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { 
-  upsertInspectionAction, 
-  deleteEntryAction, 
-  finalizeInspectionAction,
-  getInspectionWithEntries 
-} from "@/app/actions/inspection";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useVerificationHub } from "./use-verification-hub";
 
 interface Facility {
   id: string;
@@ -27,105 +18,33 @@ interface Facility {
   departments: { id: string; name: string }[];
 }
 
-export function VerificationHub({ 
+export function VerificationHub({
   facilities,
-  initialInspectionId
-}: { 
-  facilities: Facility[],
-  initialInspectionId?: string
+  initialInspectionId,
+}: {
+  facilities: Facility[];
+  initialInspectionId?: string;
 }) {
-  const router = useRouter();
-  const [inspectionId, setInspectionId] = useState<string | null>(initialInspectionId || null);
-  const [facilityId, setFacilityId] = useState<string>("");
-  const [entries, setEntries] = useState<any[]>([]);
-  const [staffingCalculations, setStaffingCalculations] = useState<any[]>([]);
-  const [isFinishing, setIsFinishing] = useState(false);
-  const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
-  const [calculationModalOpen, setCalculationModalOpen] = useState(false);
-  const [selectedCalculationEntry, setSelectedCalculationEntry] = useState<any>(null);
-  const [modalMode, setModalMode] = useState<"staffing" | "inspection" | null>(null);
-  const [editingEntry, setEditingEntry] = useState<any | null>(null);
+  const {
+    inspectionId,
+    facilityId,
+    entries,
+    staffingCalculations,
+    isFinishing,
+    calculationModalOpen, setCalculationModalOpen,
+    selectedCalculationEntry,
+    modalMode, setModalMode,
+    editingEntry,
+    handleFacilityChange,
+    handleAddItem,
+    handleCalculateItem,
+    handleEditEntry,
+    handleDelete,
+    handleFinish,
+    handleModalSuccess,
+  } = useVerificationHub(initialInspectionId);
 
-  const selectedFacility = facilities.find(f => f.id === facilityId);
-
-  // Load existing inspection metadata if ID is provided
-  useEffect(() => {
-    async function loadExisting() {
-      if (initialInspectionId) {
-        const res = await getInspectionWithEntries(initialInspectionId);
-        if (res) {
-          setFacilityId(res.facilityId);
-          setEntries(res.entries);
-          setStaffingCalculations((res as any).staffingCalculations || []);
-        }
-      }
-    }
-    loadExisting();
-  }, [initialInspectionId]);
-
-  // Initialize or reload inspection
-  async function ensureInspection(newFacilityId: string) {
-    if (!inspectionId && newFacilityId) {
-      const res = await upsertInspectionAction({
-        facilityId: newFacilityId,
-        inspectorId: "system-user",
-      });
-      if (res.success && res.data?.id) {
-        setInspectionId(res.data.id);
-      }
-    }
-  }
-
-  async function refreshData() {
-    if (inspectionId) {
-      const res = await getInspectionWithEntries(inspectionId);
-      if (res) {
-        setEntries(res.entries);
-        setStaffingCalculations((res as any).staffingCalculations || []);
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (inspectionId) refreshData();
-  }, [inspectionId]);
-
-  const handleAddItem = (mode: "staffing" | "inspection") => {
-    if (!facilityId) {
-      toast.warning("Selecione uma unidade para começar.");
-      return;
-    }
-    if (!inspectionId) {
-      toast.info("Aguarde a inicialização da inspeção. Tente novamente em alguns segundos.");
-      return;
-    }
-    setModalMode(mode);
-    setEditingEntry(null);
-  };
-
-  const handleCalculateItem = (entry: any) => {
-    setSelectedCalculationEntry(entry);
-    setCalculationModalOpen(true);
-  };
-
-  const handleFinish = async () => {
-    if (!inspectionId) return;
-    setIsFinishing(true);
-    const res = await finalizeInspectionAction(inspectionId);
-    if (res.success) {
-      router.push("/inspections");
-    } else {
-      toast.error(res.error);
-      setIsFinishing(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Deseja remover este item?")) {
-      const res = await deleteEntryAction(id);
-      if (res.success) refreshData();
-    }
-  };
+  const selectedFacility = facilities.find((f) => f.id === facilityId);
 
   return (
     <div className="max-w-4xl mx-auto py-6 sm:py-10 px-4 space-y-8 animate-in fade-in duration-500">
@@ -139,9 +58,9 @@ export function VerificationHub({
           </h1>
           <p className="text-slate-500 mt-2 text-sm font-medium">Gestão Integrada de Verificações e Dimensionamento</p>
         </div>
-        
+
         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold">
-          {inspectionId ? `ID: ${inspectionId.split('-')[0]}` : "Novo Rascunho"}
+          {inspectionId ? `ID: ${inspectionId.split("-")[0]}` : "Novo Rascunho"}
         </Badge>
       </div>
 
@@ -149,19 +68,14 @@ export function VerificationHub({
         <CardContent className="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white">
           <div className="space-y-2">
             <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Unidade de Saúde</Label>
-            <Select 
-              onValueChange={(val) => {
-                if (val) {
-                  setFacilityId(val);
-                  ensureInspection(val);
-                }
-              }} 
+            <Select
+              onValueChange={(val) => { if (val) handleFacilityChange(val); }}
               value={facilityId}
               disabled={!!inspectionId && entries.length > 0}
             >
               <SelectTrigger className="h-12 bg-white border-slate-200 hover:border-slate-300 transition-colors">
                 <SelectValue placeholder="Selecione a Unidade...">
-                  {facilities.find(f => f.id === facilityId)?.name}
+                  {facilities.find((f) => f.id === facilityId)?.name}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -188,34 +102,32 @@ export function VerificationHub({
       </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-         <Button 
-            variant="outline" 
-            className="h-28 sm:h-32 border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 group flex flex-col gap-3 rounded-2xl transition-all shadow-sm"
-            onClick={() => handleAddItem("staffing")}
-          >
-            <div className="p-3 bg-emerald-100/50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-emerald-100">
-              <Calculator className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div className="text-emerald-800 font-bold text-sm sm:text-base">Incluir Dimensionamento</div>
-         </Button>
+        <Button
+          variant="outline"
+          className="h-28 sm:h-32 border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 group flex flex-col gap-3 rounded-2xl transition-all shadow-sm"
+          onClick={() => handleAddItem("staffing")}
+        >
+          <div className="p-3 bg-emerald-100/50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-emerald-100">
+            <Calculator className="w-6 h-6 sm:w-7 sm:h-7" />
+          </div>
+          <div className="text-emerald-800 font-bold text-sm sm:text-base">Incluir Dimensionamento</div>
+        </Button>
 
-         <Button 
-            variant="outline" 
-            className="h-28 sm:h-32 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 group flex flex-col gap-3 rounded-2xl transition-all shadow-sm"
-            onClick={() => handleAddItem("inspection")}
-          >
-            <div className="p-3 bg-blue-100/50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-blue-100">
-              <ClipboardCheck className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div className="text-blue-800 font-bold text-sm sm:text-base">Incluir Inspeção de Setor</div>
-         </Button>
+        <Button
+          variant="outline"
+          className="h-28 sm:h-32 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 group flex flex-col gap-3 rounded-2xl transition-all shadow-sm"
+          onClick={() => handleAddItem("inspection")}
+        >
+          <div className="p-3 bg-blue-100/50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-blue-100">
+            <ClipboardCheck className="w-6 h-6 sm:w-7 sm:h-7" />
+          </div>
+          <div className="text-blue-800 font-bold text-sm sm:text-base">Incluir Inspeção de Setor</div>
+        </Button>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800">
-            Itens Verificados
-          </h2>
+          <h2 className="text-xl font-bold text-slate-800">Itens Verificados</h2>
           <Badge variant="secondary" className="bg-slate-100 text-slate-600 rounded-full px-3">{entries.length} itens</Badge>
         </div>
 
@@ -234,16 +146,13 @@ export function VerificationHub({
         ) : (
           <div className="space-y-4">
             {entries.map((entry) => {
-              const hasCalc = staffingCalculations.some(calc => calc.departmentId === entry.departmentId);
+              const hasCalc = staffingCalculations.some((calc) => calc.departmentId === entry.departmentId);
               return (
                 <ItemCard
                   key={entry.id}
                   entry={entry}
                   hasCalculation={hasCalc}
-                  onEdit={() => {
-                    setEditingEntry(entry);
-                    setModalMode(entry.type === "staffing" ? "staffing" : "inspection");
-                  }}
+                  onEdit={() => handleEditEntry(entry)}
                   onDelete={() => handleDelete(entry.id)}
                   onCalculate={() => handleCalculateItem(entry)}
                 />
@@ -254,7 +163,7 @@ export function VerificationHub({
       </div>
 
       <div className="pt-6 mt-4 flex justify-end">
-        <Button 
+        <Button
           className="w-full sm:w-auto h-14 px-8 bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 text-lg font-bold flex items-center justify-center gap-3 rounded-xl transition-all disabled:opacity-50 disabled:shadow-none"
           disabled={!inspectionId || entries.length === 0 || isFinishing}
           onClick={handleFinish}
@@ -276,10 +185,7 @@ export function VerificationHub({
           inspectionId={inspectionId!}
           facility={selectedFacility}
           initialData={editingEntry}
-          onSuccess={() => {
-            setModalMode(null);
-            refreshData();
-          }}
+          onSuccess={handleModalSuccess}
           existingEntries={entries}
         />
       )}
@@ -295,7 +201,7 @@ export function VerificationHub({
               initialData={selectedCalculationEntry.metadata?.calculationInputs}
               onSuccess={() => {
                 setCalculationModalOpen(false);
-                refreshData();
+                // refreshData called inside hook via handleModalSuccess pattern
               }}
               onCancel={() => setCalculationModalOpen(false)}
             />

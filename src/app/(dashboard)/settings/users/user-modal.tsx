@@ -1,61 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter,
-  DialogDescription
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { createUser } from "@/app/actions/settings";
-import { useRouter } from "next/navigation";
-import { UserPlus, Shield, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
+import { UserRole } from "@prisma/client";
+import { useUserForm } from "./use-user-form";
 
 export function UserModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "CONSULTOR" as "ADMIN" | "GESTOR" | "CONSULTOR",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    const res = await createUser({
-      name: formData.name,
-      email: formData.email,
-      passwordHash: formData.password,
-      role: formData.role,
-    });
-
-    if (res.success) {
-      setFormData({ name: "", email: "", password: "", role: "CONSULTOR" });
-      onClose();
-      router.refresh();
-      toast.success("Usuário criado com sucesso!");
-    } else {
-      toast.error(res.error);
-    }
-    setIsSubmitting(false);
-  };
+  const {
+    formData,
+    setFormData,
+    isSubmitting,
+    showPassword,
+    setShowPassword,
+    handleSubmit,
+  } = useUserForm(onClose);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -82,7 +44,7 @@ export function UserModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="user-email">E-mail Corporativo</Label>
               <Input
@@ -119,27 +81,27 @@ export function UserModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 
             <div className="space-y-2">
               <Label htmlFor="user-role">Perfil de Acesso</Label>
-              <Select 
-                onValueChange={(val: any) => setFormData({ ...formData, role: val })} 
+              <Select
+                onValueChange={(val) => { if (val) setFormData({ ...formData, role: val as UserRole }); }}
                 value={formData.role}
               >
                 <SelectTrigger id="user-role">
                   <SelectValue placeholder="Selecione um perfil" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ADMIN">
+                  <SelectItem value={UserRole.ADMIN}>
                     <div className="flex flex-col">
                       <span className="font-bold">Administrador</span>
                       <span className="text-[10px] text-slate-500">Acesso total às configurações e dados</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="GESTOR">
+                  <SelectItem value={UserRole.GESTOR}>
                     <div className="flex flex-col">
                       <span className="font-bold">Gestor</span>
                       <span className="text-[10px] text-slate-500">Visualiza dashboards e relatórios das unidades</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="CONSULTOR">
+                  <SelectItem value={UserRole.CONSULTOR}>
                     <div className="flex flex-col">
                       <span className="font-bold">Consultor</span>
                       <span className="text-[10px] text-slate-500">Realiza inspeções e coleta evidências</span>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { ComplianceStatus } from "@prisma/client";
-import { ClipboardCheck, Home, Droplets, Lightbulb, Trash2, ShieldAlert, LayoutPanelLeft } from "lucide-react";
+import { INFRA_QUESTIONS } from "@/lib/constants/inspection";
 
 interface InfraFormProps {
   initialData?: any;
@@ -14,19 +14,9 @@ interface InfraFormProps {
   isLoading: boolean;
 }
 
-const QUESTIONS = [
-  { id: "areaMinima", label: "Possui área mínima de 12m² por leito?", icon: Home },
-  { id: "identificacaoVisual", label: "Possui identificação visual em local visível?", icon: LayoutPanelLeft },
-  { id: "trincasRachaduras", label: "Apresenta trincas ou rachaduras?", icon: ShieldAlert },
-  { id: "infiltracoes", label: "Apresenta infiltrações/umidade?", icon: Droplets },
-  { id: "pisoApropriado", label: "Piso apropriado para área hospitalar?", icon: LayoutPanelLeft },
-  { id: "iluminacaoAdequada", label: "Iluminação adequada no ambiente?", icon: Lightbulb },
-  { id: "lixeiraPedal", label: "Lixeira com acionamento por pedal?", icon: Trash2 },
-];
-
 export function InfraForm({ initialData, onSubmit, isLoading }: InfraFormProps) {
   const { register, handleSubmit, control } = useForm({
-    defaultValues: initialData?.metadata || QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), { observations: "" })
+    defaultValues: initialData?.metadata || INFRA_QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), { observations: "" })
   });
 
   const handleFormSubmit = (data: any) => {
@@ -42,7 +32,7 @@ export function InfraForm({ initialData, onSubmit, isLoading }: InfraFormProps) 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
-        {QUESTIONS.map((q) => (
+        {INFRA_QUESTIONS.map((q) => (
           <div key={q.id} className="flex flex-col space-y-3 p-4 rounded-xl border bg-slate-50/50">
             <div className="flex items-start gap-3">
               <q.icon className="w-5 h-5 text-slate-400 mt-0.5" />

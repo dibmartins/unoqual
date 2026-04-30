@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Save } from "lucide-react";
-import { updateOrganization } from "@/app/actions/settings";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useOrganizationForm } from "./use-organization-form";
 
 type Organization = {
   id: string;
@@ -19,31 +16,11 @@ type Organization = {
   _count?: {
     facilities: number;
     users: number;
-  }
+  };
 };
 
 export function OrganizationForm({ organization }: { organization: Organization }) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: organization.name,
-    cnpj: organization.cnpj,
-    address: organization.address || "",
-    phone: organization.phone || "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    const res = await updateOrganization(organization.id, formData);
-    if (res.success) {
-      router.refresh();
-      toast.success("Dados atualizados com sucesso!");
-    } else {
-      toast.error(res.error);
-    }
-    setIsSubmitting(false);
-  };
+  const { formData, setFormData, isSubmitting, handleSubmit } = useOrganizationForm(organization);
 
   return (
     <Card>

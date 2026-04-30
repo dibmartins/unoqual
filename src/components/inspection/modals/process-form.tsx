@@ -7,19 +7,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ComplianceStatus } from "@prisma/client";
-import { 
-  FileText, 
-  ShieldCheck, 
-  Stethoscope, 
-  Utensils, 
-  Thermometer, 
-  Monitor, 
-  Settings, 
-  Zap, 
-  GraduationCap, 
-  BarChart3,
-  Clock
-} from "lucide-react";
+import { Clock } from "lucide-react";
+import { PROCESS_QUESTIONS } from "@/lib/constants/inspection";
 
 interface ProcessFormProps {
   initialData?: any;
@@ -27,25 +16,10 @@ interface ProcessFormProps {
   isLoading: boolean;
 }
 
-const QUESTIONS = [
-  { id: "popsAtualizados", label: "Existem normas, procedimentos e rotinas técnicas (POPs) escritas e atualizadas?", icon: FileText },
-  { id: "medicamentosControlados", label: "Guarda de medicamentos controlados em local fechado e seguro?", icon: ShieldCheck },
-  { id: "proibicaoAlimentos", label: "Respeitada a proibição de alimentos nos postos de saúde?", icon: Utensils },
-  { id: "classificacaoRisco", label: "É realizada a classificação de risco (Manchester)?", icon: Stethoscope },
-  { id: "controleDieta", label: "Existe controle de dieta por nutricionista?", icon: Utensils },
-  { id: "escalaVisivel", label: "A escala de serviço está afixada em local visível?", icon: FileText },
-  { id: "controleTemperatura", label: "Existe registro de controle diário de temperatura?", icon: Thermometer },
-  { id: "sistemaDigital", label: "Possui sistema digital integrado?", icon: Monitor },
-  { id: "manutencaoEquipamentos", label: "Mantém registro de manutenção preventiva/corretiva de equipamentos?", icon: Settings },
-  { id: "energiaEmergencia", label: "Possui sistema de energia elétrica de emergência?", icon: Zap },
-  { id: "capacitacaoProfissional", label: "Mantém registro de capacitações permanentes dos profissionais?", icon: GraduationCap },
-  { id: "indicadoresLegais", label: "Calcula e mantém o registro dos indicadores previstos em lei?", icon: BarChart3 },
-];
-
 export function ProcessForm({ initialData, onSubmit, isLoading }: ProcessFormProps) {
   const { register, handleSubmit, control } = useForm({
     defaultValues: initialData?.metadata || {
-      ...QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), {}),
+      ...PROCESS_QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), {}),
       tempoEspera: "",
       tempoPermanencia: "",
       observations: ""
@@ -81,7 +55,7 @@ export function ProcessForm({ initialData, onSubmit, isLoading }: ProcessFormPro
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {QUESTIONS.map((q) => (
+        {PROCESS_QUESTIONS.map((q) => (
           <div key={q.id} className="flex flex-col space-y-3 p-4 rounded-xl border bg-slate-50/50">
             <div className="flex items-start gap-3">
               <q.icon className="w-5 h-5 text-slate-400 mt-0.5" />

@@ -6,19 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { ComplianceStatus } from "@prisma/client";
-import { 
-  Thermometer, 
-  Activity, 
-  Stethoscope, 
-  Syringe, 
-  Layers, 
-  Droplets, 
-  Zap, 
-  HeartPulse, 
-  Ambulance,
-  Search,
-  Wind
-} from "lucide-react";
+import { EQUIPMENT_QUESTIONS } from "@/lib/constants/inspection";
 
 interface EquipmentFormProps {
   initialData?: any;
@@ -26,26 +14,10 @@ interface EquipmentFormProps {
   isLoading: boolean;
 }
 
-const QUESTIONS = [
-  { id: "termometro", label: "Termômetro clínico em boas condições?", icon: Thermometer },
-  { id: "esfignomanometro", label: "Esfignomanômetro (aparelho de pressão) calibrado?", icon: Activity },
-  { id: "estetoscopio", label: "Estetoscópio funcional e higienizado?", icon: Stethoscope },
-  { id: "glicosimetro", label: "Glicosímetro com tiras na validade e controle?", icon: Droplets },
-  { id: "oximetro", label: "Oxímetro de pulso funcional?", icon: Activity },
-  { id: "suporteSoro", label: "Suportes de soro em quantidade suficiente e estáveis?", icon: Syringe },
-  { id: "escadaDoisDegraus", label: "Escadas de 2 degraus com antiderrapante?", icon: Layers },
-  { id: "monitorMultiparametrico", label: "Monitor multiparamétrico com cabos e sensores?", icon: HeartPulse },
-  { id: "bombaInfusora", label: "Bombas infusoras com baterias carregadas?", icon: Droplets },
-  { id: "desfibrilador", label: "Desfibrilador/Cardioversor com carga e pás?", icon: Zap },
-  { id: "carroParada", label: "Carro de parada lacrado e com checklist em dia?", icon: Ambulance },
-  { id: "laringoscopio", label: "Laringoscópio com lâminas e pilhas funcionais?", icon: Search },
-  { id: "ambu", label: "Ambu (Reanimador manual) completo e limpo?", icon: Wind },
-];
-
 export function EquipmentForm({ initialData, onSubmit, isLoading }: EquipmentFormProps) {
   const { register, handleSubmit, control } = useForm({
     defaultValues: initialData?.metadata || {
-      ...QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), {}),
+      ...EQUIPMENT_QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), {}),
       observations: ""
     }
   });
@@ -61,7 +33,7 @@ export function EquipmentForm({ initialData, onSubmit, isLoading }: EquipmentFor
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
-        {QUESTIONS.map((q) => (
+        {EQUIPMENT_QUESTIONS.map((q) => (
           <div key={q.id} className="flex flex-col space-y-3 p-4 rounded-xl border bg-slate-50/50">
             <div className="flex items-start gap-3">
               <q.icon className="w-5 h-5 text-slate-400 mt-0.5" />

@@ -6,14 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { ComplianceStatus } from "@prisma/client";
-import { 
-  FileCheck, 
-  Bug, 
-  Flame, 
-  Handshake, 
-  UserCheck, 
-  Globe
-} from "lucide-react";
+import { DOCUMENT_QUESTIONS } from "@/lib/constants/inspection";
 
 interface DocumentFormProps {
   initialData?: any;
@@ -21,19 +14,10 @@ interface DocumentFormProps {
   isLoading: boolean;
 }
 
-const QUESTIONS = [
-  { id: "alvaraSanitario", label: "Possui alvará sanitário vigente?", icon: FileCheck },
-  { id: "controleVetores", label: "Garante ações eficazes e contínuas de controle de vetores e pragas urbanas (dedetização)?", icon: Bug },
-  { id: "licencaBombeiros", label: "Possui licença do Corpo de Bombeiros (CBMERJ) vigente?", icon: Flame },
-  { id: "contratosTerceirizados", label: "Contratos e alvarás das empresas terceirizadas estão atualizados?", icon: Handshake },
-  { id: "responsavelTecnico", label: "Possui responsável técnico (RT) e substituto para medicina, enfermagem e fisio?", icon: UserCheck },
-  { id: "cnesAtualizado", label: "O Cadastro Nacional de Estabelecimentos de Saúde (CNES) está atualizado?", icon: Globe },
-];
-
 export function DocumentForm({ initialData, onSubmit, isLoading }: DocumentFormProps) {
   const { register, handleSubmit, control } = useForm({
     defaultValues: initialData?.metadata || {
-      ...QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), {}),
+      ...DOCUMENT_QUESTIONS.reduce((acc, q) => ({ ...acc, [q.id]: ComplianceStatus.NOT_APPLICABLE }), {}),
       observations: ""
     }
   });
@@ -49,7 +33,7 @@ export function DocumentForm({ initialData, onSubmit, isLoading }: DocumentFormP
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
-        {QUESTIONS.map((q) => (
+        {DOCUMENT_QUESTIONS.map((q) => (
           <div key={q.id} className="flex flex-col space-y-3 p-4 rounded-xl border bg-slate-50/50">
             <div className="flex items-start gap-3">
               <q.icon className="w-5 h-5 text-slate-400 mt-0.5" />

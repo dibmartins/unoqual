@@ -1,67 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, Loader2, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-const loginSchema = z.object({
-  email: z.string().email("Endereço de email inválido"),
-  password: z.string().min(1, "A senha é obrigatória"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { useLoginForm } from "./use-login-form";
 
 export function LoginForm() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Credenciais inválidas. Verifique seu email e senha.");
-      } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } catch (err) {
-      setError("Ocorreu um erro ao tentar entrar. Tente novamente.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { form, error, isLoading, showPassword, setShowPassword, onSubmit } = useLoginForm();
+  const { register, handleSubmit, formState: { errors } } = form;
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50/50 relative overflow-hidden">
@@ -140,9 +89,9 @@ export function LoginForm() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all hover:scale-[1.01] active:scale-[0.98]" 
+              <Button
+                type="submit"
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all hover:scale-[1.01] active:scale-[0.98]"
                 disabled={isLoading}
               >
                 {isLoading ? (
