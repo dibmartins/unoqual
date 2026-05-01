@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ShieldCheck, Loader2, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLoginForm } from "./use-login-form";
+import Link from "next/link";
 
 export function LoginForm() {
   const { form, error, isLoading, showPassword, setShowPassword, onSubmit } = useLoginForm();
@@ -47,7 +48,7 @@ export function LoginForm() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Corporativo</Label>
+                  <Label htmlFor="email">E-mail</Label>
                   <Input
                     id="email"
                     type="email"
@@ -117,9 +118,12 @@ export function LoginForm() {
 
         <p className="mt-8 text-center text-sm text-slate-400">
           Não tem uma conta?{" "}
-          <Button variant="link" className="p-0 h-auto text-sm text-slate-600 font-semibold underline decoration-blue-500/30 underline-offset-4">
+          <Link
+            href="/onboarding"
+            className="text-sm text-slate-600 font-semibold underline decoration-blue-500/30 underline-offset-4 hover:text-blue-600 transition-colors"
+          >
             Solicitar acesso
-          </Button>
+          </Link>
         </p>
       </div>
     </div>

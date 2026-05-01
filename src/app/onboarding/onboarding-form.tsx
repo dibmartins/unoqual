@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CnpjInput } from "@/components/ui/cnpj-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -62,9 +63,9 @@ export function OnboardingForm() {
         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white mx-auto mb-4">
           <ShieldCheck className="w-8 h-8" />
         </div>
-        <CardTitle className="text-2xl font-black">Blindar Minha Unidade</CardTitle>
+        <CardTitle className="text-2xl font-black">Automatizar minhas inspeções</CardTitle>
         <CardDescription>
-          Comece agora sua jornada para a conformidade digital.
+          Vamos guiá-lo em sua jornada para a excelência na saúde.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -74,7 +75,7 @@ export function OnboardingForm() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="orgName">Nome da Unidade / Hospital</Label>
@@ -82,7 +83,7 @@ export function OnboardingForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="orgCnpj">CNPJ</Label>
-              <Input id="orgCnpj" name="orgCnpj" placeholder="00.000.000/0000-00" required disabled={isLoading} />
+              <CnpjInput id="orgCnpj" name="orgCnpj" placeholder="00.000.000/0000-00" required disabled={isLoading} />
             </div>
           </div>
 
@@ -108,10 +109,10 @@ export function OnboardingForm() {
                 Criando Acesso...
               </>
             ) : (
-              "Finalizar Onboarding"
+              "Vamos começar"
             )}
           </Button>
-          
+
           <p className="text-center text-xs text-slate-500 mt-4">
             Ao clicar em finalizar, você concorda com nossos Termos de Uso e Política de Privacidade.
           </p>

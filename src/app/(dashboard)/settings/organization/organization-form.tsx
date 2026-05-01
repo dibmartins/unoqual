@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CnpjInput } from "@/components/ui/cnpj-input";
 import { Label } from "@/components/ui/label";
 import { Building2, Save } from "lucide-react";
 import { useOrganizationForm } from "./use-organization-form";
@@ -61,13 +62,12 @@ export function OrganizationForm({ organization }: { organization: Organization 
             </div>
             <div className="space-y-2">
               <Label htmlFor="cnpj" className="text-sm font-semibold">CNPJ</Label>
-              <Input
+              <CnpjInput
                 id="cnpj"
                 value={formData.cnpj}
                 onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
                 placeholder="00.000.000/0000-00"
                 required
-                inputMode="numeric"
                 className="h-11"
               />
             </div>
