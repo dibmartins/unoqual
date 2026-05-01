@@ -78,7 +78,7 @@ export function OnboardingForm() {
 
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="orgName">Nome da Unidade / Hospital</Label>
+              <Label htmlFor="orgName">Empresa</Label>
               <Input id="orgName" name="orgName" placeholder="Ex: Hospital Central" required disabled={isLoading} />
             </div>
             <div className="space-y-2">
@@ -95,7 +95,7 @@ export function OnboardingForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">E-mail Profissional</Label>
-            <Input id="email" name="email" type="email" placeholder="nome@hospital.com" required disabled={isLoading} />
+            <Input id="email" name="email" type="email" placeholder="nome@empresa.com" required disabled={isLoading} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
