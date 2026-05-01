@@ -49,7 +49,6 @@ enum UserRole {
   GESTOR
   CONSULTOR
 }
-
 model User {
   id             String       @id @default(uuid()) @map("id")
   name           String       @map("name")
@@ -58,7 +57,11 @@ model User {
   role           UserRole     @default(CONSULTOR) @map("role")
   organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
+
+  // Reset password fields
+  resetPasswordToken   String?   @unique @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires")
+
   // Audit relations
   inspectionsCreated     Inspection[]          @relation("CreatedBy")
   inspectionsUpdated     Inspection[]          @relation("UpdatedBy")

@@ -64,9 +64,9 @@ export function LoginForm() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Senha</Label>
-                    <Button variant="link" className="px-0 h-auto text-xs text-blue-600 hover:text-blue-700" type="button">
+                    <Link href="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
                       Esqueceu a senha?
-                    </Button>
+                    </Link>
                   </div>
                   <div className="relative">
                     <Input
