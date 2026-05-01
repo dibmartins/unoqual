@@ -64,7 +64,7 @@ export function ResetPasswordForm() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>Link de recuperação inválido ou incompleto.</AlertDescription>
         </Alert>
-        <Link href="/forgot-password" summerized="text-sm font-semibold text-blue-600">
+        <Link href="/forgot-password" className="text-sm font-semibold text-blue-600">
           Solicitar novo link
         </Link>
       </Card>
